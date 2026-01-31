@@ -53,8 +53,8 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
     .stApp { background-color: #000000; color: #ededed; font-family: 'Inter', sans-serif; }
     .main .block-container { max-width: 900px; padding-top: 4rem; }
-    .main-title { font-weight: 800; font-size: 2.5rem !important; letter-spacing: -0.05em; margin-bottom: 0.5rem; color: #ffffff; text-align: center; }
-    .sub-title { color: #888888; font-size: 1.1rem; margin-bottom: 3rem; text-align: center; }
+    .main-title { font-weight: 800; font-size: 2.5rem !important; letter-spacing: -0.05em; margin-bottom: 0.5rem; color: #ffffff; text-align: left; }
+    .sub-title { color: #888888; font-size: 1.1rem; margin-bottom: 3rem; text-align: left; }
     .stFileUploader { border: 1px solid #333333 !important; border-radius: 8px !important; background-color: #0a0a0a !important; padding: 1rem !important; }
     .stButton > button { background-color: #ffffff !important; color: #000000 !important; border-radius: 6px !important; font-weight: 600 !important; height: 3rem; width: 100%; transition: all 0.2s ease; border: none; }
     .audio-card { background: #0a0a0a; padding: 1.2rem; border-radius: 8px; border: 1px solid #333333; margin-bottom: 1rem; }
@@ -79,18 +79,18 @@ except Exception as e:
     st.stop()
 
 st.subheader(T['step1'])
-col_up1, col_up2, col_up3 = st.columns([1, 4, 1])
-with col_up2:
+col_up1, col_up2 = st.columns([2, 1])
+with col_up1:
     uploaded_file = st.file_uploader(T['uploader_label'], type=["wav", "m4a", "mp3", "aac"], label_visibility="collapsed")
 
 if uploaded_file:
     st.markdown("---")
     st.subheader(T['step2'])
-    col_conf1, col_conf2, col_conf3 = st.columns([1, 4, 1])
-    with col_conf2:
+    col_conf1, col_conf2 = st.columns([2, 1])
+    with col_conf1:
         atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
         
-    if st.button(T['btn_enhance']):
+        if st.button(T['btn_enhance']):
         with st.status(T['status_processing'], expanded=True) as status:
             with tempfile.TemporaryDirectory() as tmpdirname:
                 input_path = os.path.join(tmpdirname, uploaded_file.name)
