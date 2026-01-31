@@ -38,7 +38,7 @@ T = {
     'step2_hint': '※わからなければ初期設定のままで良いです',
     'atten_label': 'ノイズ除去の制限 (dB)',
     'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
-    'btn_enhance': '✨ クリアな音声を生成する',
+    'btn_enhance': '✨ 音声を磨き上げる',
     'status_preparing': '音声を準備中...',
     'status_processing': 'AIがノイズを解析・除去しています...',
     'status_saving': '結果を生成中...',
