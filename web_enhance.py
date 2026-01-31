@@ -123,7 +123,7 @@ st.markdown("""
     }
     
     /* 共通ボタンスタイル (Vercelスタイル) */
-    .stButton > button, .stDownloadButton > button, button[data-testid="stBaseButton-secondary"] {
+    .stButton > button, .stDownloadButton > button, button[data-testid="stBaseButton-secondary"], div[data-testid="stFileUploader"] button {
         background-color: #ffffff !important;
         color: #000000 !important;
         border-radius: 6px !important;
@@ -135,27 +135,19 @@ st.markdown("""
         transition: all 0.2s ease-in-out !important;
         border: 1px solid #ffffff !important;
         margin-top: 1rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-    .stButton > button:hover, .stDownloadButton > button:hover, button[data-testid="stBaseButton-secondary"]:hover {
+    .stButton > button:hover, .stDownloadButton > button:hover, button[data-testid="stBaseButton-secondary"]:hover, div[data-testid="stFileUploader"] button:hover {
         background-color: #000000 !important;
         color: #ffffff !important;
         border: 1px solid #ffffff !important;
         transform: translateY(-1px);
     }
-    .stButton > button:active, .stDownloadButton > button:active, button[data-testid="stBaseButton-secondary"]:active {
+    .stButton > button:active, .stDownloadButton > button:active, button[data-testid="stBaseButton-secondary"]:active, div[data-testid="stFileUploader"] button:active {
         transform: translateY(0);
         opacity: 0.8;
-    }
-
-    /* Browse files ボタン (Streamlitの特殊なクラス) */
-    div[data-testid="stFileUploader"] button {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        border: none !important;
-    }
-    div[data-testid="stFileUploader"] button:hover {
-        background-color: #eeeeee !important;
-        color: #000000 !important;
     }
 
     /* スライダー */
