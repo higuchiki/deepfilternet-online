@@ -232,9 +232,19 @@ st.markdown("""
         transition: opacity 0.2s ease;
         display: flex;
         align-items: center;
+        gap: 8px;
     }
     .x-link:hover {
         opacity: 1;
+    }
+    .x-link::before {
+        content: "エラー報告・レビューはこちら";
+        font-size: 0.7rem;
+        color: #555;
+        white-space: nowrap;
+    }
+    .x-link:hover::before {
+        color: #ffffff;
     }
 
     /* エクスパンダー（折りたたみ）のカスタマイズ */
@@ -244,7 +254,7 @@ st.markdown("""
         max-width: fit-content !important;
         position: fixed;
         bottom: 12px;
-        right: 50px; /* Xアイコンの横に配置 */
+        right: 230px; /* Xアイコンとテキストの横に配置 */
         z-index: 999998;
     }
     .stExpander details {
