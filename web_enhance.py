@@ -98,7 +98,7 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えを右上に配置（iframeを使わず直接HTMLで記述） */
+    /* 言語切り替えを右上に配置 */
     .custom-lang-switch {
         position: fixed;
         top: 20px;
@@ -106,19 +106,35 @@ st.markdown("""
         z-index: 10000;
         font-size: 0.8rem;
         color: #555;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     .custom-lang-switch a {
         color: #555;
         text-decoration: none;
-        transition: color 0.2s;
-        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 4px;
     }
     .custom-lang-switch a:hover {
         color: #fff;
+        background: rgba(255,255,255,0.1);
     }
     .custom-lang-switch .active {
         color: #fff;
+        background: rgba(255,255,255,0.15);
         font-weight: 600;
+    }
+    .lang-label {
+        opacity: 0.5;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 0.7rem;
     }
 
     /* Streamlit標準要素の非表示 */
@@ -132,9 +148,13 @@ st.markdown("""
 # 言語切り替え（URLパラメータを使用するシンプルなリンク形式）
 st.markdown(f"""
     <div class="custom-lang-switch">
-        <a href="?lang=jp" class="{'active' if st.session_state.lang == 'JP' else ''}">日本語</a>
-        <span style="margin: 0 5px; opacity: 0.3;">|</span>
-        <a href="?lang=en" class="{'active' if st.session_state.lang == 'EN' else ''}">English</a>
+        <span class="lang-label">Lang:</span>
+        <a href="?lang=jp" class="{'active' if st.session_state.lang == 'JP' else ''}">
+            <span style="font-size: 1rem;">🇯🇵</span> JP
+        </a>
+        <a href="?lang=en" class="{'active' if st.session_state.lang == 'EN' else ''}">
+            <span style="font-size: 1rem;">🇺🇸</span> EN
+        </a>
     </div>
 """, unsafe_allow_html=True)
 
