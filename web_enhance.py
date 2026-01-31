@@ -221,11 +221,31 @@ st.markdown("""
         font-weight: 500;
     }
 
+    /* Xアイコンのスタイル */
+    .x-link {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999999;
+        text-decoration: none !important;
+        opacity: 0.5;
+        transition: opacity 0.2s ease;
+        display: flex;
+        align-items: center;
+    }
+    .x-link:hover {
+        opacity: 1;
+    }
+
     /* エクスパンダー（折りたたみ）のカスタマイズ */
     .stExpander {
         border: none !important;
         background: transparent !important;
-        max-width: fit-content !important; /* 横幅を内容に合わせる */
+        max-width: fit-content !important;
+        position: fixed;
+        bottom: 12px;
+        right: 50px; /* Xアイコンの横に配置 */
+        z-index: 999998;
     }
     .stExpander details {
         border: none !important;
@@ -241,20 +261,6 @@ st.markdown("""
     }
     .stExpander summary svg {
         display: none !important; /* 矢印を消してさらにミニマルに */
-    }
-
-    /* Xアイコンのスタイル */
-    .x-link {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 999999;
-        text-decoration: none !important;
-        opacity: 0.5;
-        transition: opacity 0.2s ease;
-    }
-    .x-link:hover {
-        opacity: 1;
     }
 
     /* Streamlit要素の非表示 */
