@@ -47,7 +47,7 @@ T = {
     'success_msg': '🎉 成功: {duration:.1f}秒でクリアな音声が完成しました',
     'input_label': '元の音源',
     'output_label': 'AI除去後',
-    'btn_download': '📥 クリアな音声をダウンロード',
+    'btn_download': '📥 Download',
     'info_msg': 'ファイルをアップロードして「クリアな音声を生成する」をクリックしてください。',
     'powered_by': 'Powered by',
 }
