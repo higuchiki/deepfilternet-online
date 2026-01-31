@@ -282,21 +282,27 @@ if uploaded_file:
                         enhanced = torch.cat(chunks, dim=1)
                         proc_duration = time.time() - proc_start
                         
-                        st.write(T['status_saving'])
-                        output_path = os.path.join(tmpdirname, "enhanced.wav")
-                        save_audio(output_path, enhanced, sr=df_state.sr())
-                        with open(output_path, "rb") as f:
-                            audio_bytes = f.read()
-                        
-                        st.session_state['processed_data'] = {
-                            'input': uploaded_file.getvalue(),
-                            'output': audio_bytes,
-                            'name': uploaded_file.name,
-                            'time': proc_duration
-                        }
-                        status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
-                        st.rerun()
-                        
+                    st.write("結果を生成中...")
+                    output_path = os.path.join(tmpdirname, "enhanced.wav")
+                    save_audio(output_path, enhanced, sr=df_state.sr())
+                    with open(output_path, "rb") as f:
+                        audio_bytes = f.read()
+                    
+                    # タイムラグを減らすため、ここでBase64エンコードを済ませておく
+                    st.write("プレイヤーを準備中...")
+                    in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
+                    out_b64 = base64.b64encode(audio_bytes).decode()
+                    
+                    st.session_state['processed_data'] = {
+                        'in_b64': in_b64,
+                        'out_b64': out_b64,
+                        'output': audio_bytes,
+                        'name': uploaded_file.name,
+                        'time': proc_duration
+                    }
+                    status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
+                    st.rerun()
+
                     except Exception as e:
                         st.error(f"Error: {e}")
                         status.update(label="❌ Error", state="error")
@@ -311,9 +317,6 @@ if uploaded_file:
                 <div class="time">{res['time']:.1f}s</div>
             </div>
         """, unsafe_allow_html=True)
-        
-        in_b64 = base64.b64encode(res['input']).decode()
-        out_b64 = base64.b64encode(res['output']).decode()
         
         st.components.v1.html(f"""
             <style>
@@ -339,8 +342,8 @@ if uploaded_file:
                     <button id="b2" class="tgl active">{T['output_label']}</button>
                 </div>
             </div>
-            <audio id="a1" src="data:audio/wav;base64,{in_b64}"></audio>
-            <audio id="a2" src="data:audio/wav;base64,{out_b64}"></audio>
+            <audio id="a1" src="data:audio/wav;base64,{res['in_b64']}" preload="auto"></audio>
+            <audio id="a2" src="data:audio/wav;base64,{res['out_b64']}" preload="auto"></audio>
             <script>
             const a1=document.getElementById('a1'), a2=document.getElementById('a2'), p=document.getElementById('p'), s=document.getElementById('s'), ct=document.getElementById('ct'), tt=document.getElementById('tt'), b1=document.getElementById('b1'), b2=document.getElementById('b2');
             let playing=false; a1.muted=true; a2.muted=false;
