@@ -135,13 +135,9 @@ st.markdown("""
     .lang-switch-container [data-baseweb="select"]:hover > div {
         color: #ffffff !important;
     }
-    /* 矢印アイコン */
-    .lang-switch-container svg {
-        fill: #555555 !important;
-        width: 12px !important;
-    }
-    .lang-switch-container [data-baseweb="select"]:hover svg {
-        fill: #ffffff !important;
+    /* 矢印アイコンを消す */
+    .lang-switch-container [data-baseweb="select"] > div:last-child {
+        display: none !important;
     }
     /* 選択後の青い枠線（フォーカス）を消す */
     .lang-switch-container [data-baseweb="select"]:focus,
