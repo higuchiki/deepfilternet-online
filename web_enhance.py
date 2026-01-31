@@ -80,7 +80,7 @@ T = TEXTS[st.session_state.lang]
 st.markdown("""
     <style>
     /* Vercel / Next.js Docs フォントと背景 */
-    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Noto+Sans+JP:wght@100..900&display=swap');
     
     :root {
         --background: #000000;
@@ -93,7 +93,7 @@ st.markdown("""
     .stApp {
         background-color: var(--background);
         color: var(--foreground);
-        font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Geist', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     /* メインコンテナを左寄せに */
@@ -108,20 +108,22 @@ st.markdown("""
 
     /* タイトルとサブタイトル */
     .main-title {
-        font-weight: 800;
-        font-size: 3rem !important;
-        letter-spacing: -0.05em;
-        margin-bottom: 0.5rem;
+        font-family: 'Geist', 'Noto Sans JP', sans-serif;
+        font-weight: 700;
+        font-size: 2.25rem !important; /* サイズを抑えて上品に */
+        letter-spacing: -0.04em;
+        margin-bottom: 0.75rem;
         color: #ffffff;
         text-align: left;
     }
     .sub-title {
         color: var(--muted);
-        font-size: 1.2rem;
+        font-size: 1rem; /* 少し小さくしてモダンに */
         margin-bottom: 3rem;
         text-align: left;
         max-width: 600px;
-        line-height: 1.5;
+        line-height: 1.6;
+        font-weight: 400;
     }
 
     /* セクション見出し */
@@ -204,57 +206,12 @@ st.markdown("""
         border-color: #555555 !important;
     }
 
-    /* 言語切り替え */
-    .lang-switch-container {
-        position: fixed;
-        top: 20px;
-        right: 40px;
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .lang-switch-container .lang-label {
-        font-size: 0.75rem;
-        color: var(--muted);
-        font-weight: 500;
-    }
-    .lang-switch-container [data-testid="stSelectbox"] {
-        width: 100px !important;
-    }
-    .lang-switch-container [data-baseweb="select"] > div {
-        background-color: transparent !important;
-        border: none !important;
-        color: var(--muted) !important;
-        font-size: 0.8rem !important;
-        padding: 0 !important;
-        min-height: 0 !important;
-        box-shadow: none !important;
-    }
-    .lang-switch-container [data-baseweb="select"]:hover div {
-        color: #ffffff !important;
-    }
-    .lang-switch-container svg {
-        fill: var(--muted) !important;
-    }
-
     /* Streamlit要素の非表示 */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
         display: none !important;
     }
     </style>
 """, unsafe_allow_html=True)
-
-# 言語切り替え
-st.markdown('<div class="lang-switch-container"><span class="lang-label">Lang:</span>', unsafe_allow_html=True)
-lang_options = ['🇯🇵 JP', '🇺🇸 EN']
-current_idx = 0 if st.session_state.lang == 'JP' else 1
-selected_lang_name = st.selectbox("Language", options=lang_options, index=current_idx, label_visibility="collapsed", key="lang_sel")
-new_lang_code = 'JP' if 'JP' in selected_lang_name else 'EN'
-if new_lang_code != st.session_state.lang:
-    st.session_state.lang = new_lang_code
-    st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
 
 # メインコンテンツ
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
