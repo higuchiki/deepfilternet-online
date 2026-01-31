@@ -179,6 +179,10 @@ st.markdown("""
         border-color: transparent !important;
         box-shadow: none !important;
     }
+    /* 矢印アイコンを消す（さらにミニマルに） */
+    .lang-switch-container svg {
+        display: none !important;
+    }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
