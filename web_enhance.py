@@ -221,6 +221,28 @@ st.markdown("""
         font-weight: 500;
     }
 
+    /* エクスパンダー（折りたたみ）のカスタマイズ */
+    .stExpander {
+        border: none !important;
+        background: transparent !important;
+        max-width: fit-content !important; /* 横幅を内容に合わせる */
+    }
+    .stExpander details {
+        border: none !important;
+    }
+    .stExpander summary {
+        color: var(--muted) !important;
+        font-size: 0.85rem !important;
+        padding: 0 !important;
+        transition: color 0.2s ease;
+    }
+    .stExpander summary:hover {
+        color: #ffffff !important;
+    }
+    .stExpander summary svg {
+        display: none !important; /* 矢印を消してさらにミニマルに */
+    }
+
     /* Streamlit要素の非表示 */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
         display: none !important;
@@ -415,22 +437,22 @@ if uploaded_file:
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 st.divider()
 
-with st.expander("View Documentation & Technical Specs"):
+with st.expander("ドキュメント・技術仕様を表示"):
     st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;margin-bottom:1.5rem;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
     
     exp_col1, exp_col2 = st.columns(2)
     with exp_col1:
-        st.markdown("### Documentation")
+        st.markdown("### 概要")
         st.markdown("""
-        **Deep Filtering**
-        AI-powered frequency separation. Unlike traditional gates, it preserves speech quality while removing background noise.
+        **ディープフィルタリング**
+        AIによる周波数分離技術。従来のゲート処理とは異なり、背景ノイズのみを除去し、声の質感を高いクオリティで維持します。
 
-        **Performance**
-        Optimized Rust engine for near real-time processing on standard CPUs.
+        **パフォーマンス**
+        Rustで書かれた高速エンジンにより、一般的なCPU環境でもリアルタイムに近い速度で処理が可能です。
 
-        **Privacy**
-        Files are processed in-memory and never stored on disk beyond the session.
+        **プライバシー**
+        アップロードされたファイルはメモリ上でのみ処理され、セッション終了後に自動的に破棄されます。サーバーに保存されることはありません。
         """)
     with exp_col2:
-        st.markdown("### Technical Specs")
-        st.code("Sampling Rate: 48kHz\nModel: DeepFilterNet V3\nBackend: PyTorch / Rust")
+        st.markdown("### 技術仕様")
+        st.code("サンプリングレート: 48kHz\nモデル: DeepFilterNet V3\nバックエンド: PyTorch / Rust")
