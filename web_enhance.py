@@ -107,12 +107,6 @@ st.markdown("""
         letter-spacing: 0.05em;
         text-transform: uppercase;
     }
-    .beta-notice {
-        color: var(--muted);
-        font-size: 0.75rem;
-        margin-top: 1rem;
-        text-align: left;
-    }
     .sub-title {
         color: var(--muted);
         font-size: 0.9rem; /* さらに小さく */
@@ -222,7 +216,7 @@ st.markdown("""
         background: #0a0a0a;
         border-radius: 8px;
         border: 1px solid #333333;
-        margin: 1rem 0;
+        margin-bottom: 1.5rem;
         text-align: left;
         max-width: fit-content;
         min-width: 120px;
@@ -242,7 +236,7 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* Xアイコンのスタイル */
+    /* Xリンクのスタイル */
     .x-link {
         position: fixed;
         bottom: 20px;
@@ -288,6 +282,13 @@ st.markdown("""
     }
     .stExpander summary svg {
         display: none !important; /* 矢印を消してさらにミニマルに */
+    }
+
+    .beta-notice {
+        color: var(--muted);
+        font-size: 0.75rem;
+        margin-top: 1rem;
+        text-align: left;
     }
 
     /* Streamlit要素の非表示 */
@@ -494,6 +495,7 @@ if uploaded_file:
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 st.divider()
 st.markdown('<div class="beta-notice">※現在開発中のベータ版です。予期せぬ動作が発生する可能性があります。</div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;padding-left:0;margin-top:0.5rem;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
 
 with st.expander("ドキュメント・技術仕様を表示"):
     st.markdown(f"""
