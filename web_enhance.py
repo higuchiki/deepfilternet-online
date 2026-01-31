@@ -32,6 +32,7 @@ if 'lang' not in st.session_state:
 T = {
     'title': 'ClearVoice AI',
     'subtitle': 'AIが、あなたの音声から「雑音」だけを魔法のように消し去ります。',
+    'description': 'DeepFilterNet ブラウザ版<br>AIノイズ処理ライブラリDeepFilterNetを使ったノイズ処理Webアプリ',
     'step1': '1. 音源をアップロード',
     'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
     'step2': '2. 除去強度の設定',
@@ -191,6 +192,7 @@ st.markdown("""
 # メインコンテンツ
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title">{T["subtitle"]}</p>', unsafe_allow_html=True)
+st.markdown(f'<p style="color: #666; font-size: 0.9rem; margin-top: -1.5rem; margin-bottom: 3rem; line-height: 1.6;">{T["description"]}</p>', unsafe_allow_html=True)
 
 try:
     model, df_state = get_model()
