@@ -93,13 +93,13 @@ st.markdown("""
     /* 言語切り替えセレクトボックスを右上に固定 */
     .lang-switch-container {
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: 15px;
+        right: 15px;
         z-index: 999999;
-        width: 120px;
         display: flex;
         align-items: center;
         gap: 5px;
+        background: transparent !important;
     }
     .lang-switch-container .lang-label {
         font-size: 0.7rem;
@@ -107,16 +107,18 @@ st.markdown("""
         font-weight: 600;
         text-transform: uppercase;
     }
-    /* Streamlitのセレクトボックスを極限までシンプルにする */
+    /* Streamlitのセレクトボックスを完全に透明化し、テキストのみにする */
     .lang-switch-container [data-testid="stSelectbox"] {
-        width: 100% !important;
+        width: 90px !important;
+        background-color: transparent !important;
     }
     .lang-switch-container [data-testid="stSelectbox"] > div > div {
         background-color: transparent !important;
         border: none !important;
         padding: 0 !important;
     }
-    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+    /* セレクトボックスの表示テキスト部分 */
+    .lang-switch-container [data-baseweb="select"] > div:first-child {
         background-color: transparent !important;
         border: none !important;
         color: #555555 !important;
@@ -125,14 +127,22 @@ st.markdown("""
         min-height: 0 !important;
         box-shadow: none !important;
     }
-    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover > div {
+    /* ホバー時の色変更 */
+    .lang-switch-container [data-baseweb="select"]:hover > div:first-child {
         color: #ffffff !important;
     }
+    /* 矢印アイコン */
     .lang-switch-container svg {
         fill: #555555 !important;
+        width: 12px !important;
     }
-    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover svg {
+    .lang-switch-container [data-baseweb="select"]:hover svg {
         fill: #ffffff !important;
+    }
+    /* 選択後の青い枠線（フォーカス）を消す */
+    .lang-switch-container [data-baseweb="select"] {
+        border: none !important;
+        outline: none !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
