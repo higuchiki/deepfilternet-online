@@ -398,14 +398,12 @@ if uploaded_file:
             </script>
         """, height=280)
         
-        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
-        
-        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
+        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav", key="dl_btn_final")
 
 # フッター
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 st.divider()
-st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;padding-left:0;">{{T["powered_by"]}} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;padding-left:0;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
 
 with st.expander("View Documentation & Technical Specs"):
     exp_col1, exp_col2 = st.columns(2)
