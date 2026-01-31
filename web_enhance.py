@@ -108,14 +108,10 @@ st.markdown("""
         text-transform: uppercase;
     }
     .beta-notice {
-        background: rgba(255, 165, 0, 0.1);
-        border: 1px solid rgba(255, 165, 0, 0.2);
-        color: #ffa500;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        margin-bottom: 2rem;
-        display: inline-block;
+        color: var(--muted);
+        font-size: 0.75rem;
+        margin-top: 1rem;
+        text-align: left;
     }
     .sub-title {
         color: var(--muted);
@@ -313,7 +309,6 @@ st.markdown(f"""
 
 # メインコンテンツ
 st.markdown(f'<h1 class="main-title">{T["title"]} <span class="version-badge">{T["version"]}</span></h1>', unsafe_allow_html=True)
-st.markdown(f'<div class="beta-notice">⚠️ 現在開発中のベータ版です。予期せぬ動作が発生する可能性があります。</div>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title" style="margin-bottom: 3rem;">{T["subtitle"]}</p>', unsafe_allow_html=True)
 
 try:
@@ -498,6 +493,7 @@ if uploaded_file:
 # フッター
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 st.divider()
+st.markdown('<div class="beta-notice">※現在開発中のベータ版です。予期せぬ動作が発生する可能性があります。</div>', unsafe_allow_html=True)
 
 with st.expander("ドキュメント・技術仕様を表示"):
     st.markdown(f"""
