@@ -86,16 +86,16 @@ st.markdown("""
     .main-title {
         font-family: 'Geist', 'Noto Sans JP', sans-serif;
         font-weight: 700;
-        font-size: 2.25rem !important;
-        letter-spacing: -0.04em;
-        margin-bottom: 0.75rem;
+        font-size: 1.5rem !important; /* サイズを大幅に抑えてモダンに */
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
         color: #ffffff;
         text-align: left;
     }
     .sub-title {
         color: var(--muted);
-        font-size: 1rem;
-        margin-bottom: 3rem;
+        font-size: 0.9rem; /* さらに小さく */
+        margin-bottom: 2.5rem;
         text-align: left;
         max-width: 600px;
         line-height: 1.6;
@@ -106,8 +106,11 @@ st.markdown("""
     h2, h3, .stSubheader {
         color: #ffffff !important;
         font-weight: 600 !important;
-        letter-spacing: -0.02em !important;
+        font-size: 1rem !important; /* ラベルのような控えめなサイズ */
+        letter-spacing: 0.02em !important;
         text-align: left !important;
+        margin-top: 2rem !important;
+        margin-bottom: 1rem !important;
     }
 
     /* アップローダー */
