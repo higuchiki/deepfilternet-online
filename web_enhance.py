@@ -63,7 +63,7 @@ st.markdown("""
         --foreground: #ededed;
         --muted: #888888;
         --border: #333333;
-        --accent: #ffffff;
+        --accent: #0070f3; /* Vercel Blue */
     }
 
     .stApp {
@@ -125,21 +125,21 @@ st.markdown("""
     /* 共通ボタンスタイル (Vercelスタイル) */
     .stButton > button, .stDownloadButton > button {
         background-color: var(--accent) !important;
-        color: #000000 !important;
+        color: #ffffff !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
         height: 2.8rem !important;
         width: auto !important;
         min-width: 160px;
         padding: 0 2rem !important;
-        transition: opacity 0.2s ease;
+        transition: all 0.2s ease;
         border: none !important;
         margin-top: 1rem !important;
     }
     .stButton > button:hover, .stDownloadButton > button:hover {
-        opacity: 0.9;
+        opacity: 0.8;
         background-color: var(--accent) !important;
-        color: #000000 !important;
+        color: #ffffff !important;
     }
 
     /* スライダー */
