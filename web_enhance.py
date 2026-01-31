@@ -243,11 +243,34 @@ st.markdown("""
         display: none !important; /* 矢印を消してさらにミニマルに */
     }
 
+    /* Xアイコンのスタイル */
+    .x-link {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 999999;
+        text-decoration: none !important;
+        opacity: 0.5;
+        transition: opacity 0.2s ease;
+    }
+    .x-link:hover {
+        opacity: 1;
+    }
+
     /* Streamlit要素の非表示 */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
         display: none !important;
     }
     </style>
+""", unsafe_allow_html=True)
+
+# Xアイコン（右上に固定）
+st.markdown(f"""
+    <a href="https://x.com/HiguchiKi" target="_blank" class="x-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+    </a>
 """, unsafe_allow_html=True)
 
 # メインコンテンツ
