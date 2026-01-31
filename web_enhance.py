@@ -173,6 +173,12 @@ st.markdown("""
         background-color: transparent !important;
         border: none !important;
     }
+    /* 最終手段：すべての背景色を強制的に透明にする */
+    .lang-switch-container * {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+    }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
