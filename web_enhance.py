@@ -24,7 +24,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 言語設定
+# 言語設定の初期化
 if 'lang' not in st.session_state:
     st.session_state.lang = 'JP'
 
@@ -74,6 +74,14 @@ TEXTS = {
     }
 }
 
+# クエリパラメータによる言語切り替えのチェック
+query_params = st.query_params
+if "lang" in query_params:
+    new_lang = query_params["lang"].upper()
+    if new_lang in ['JP', 'EN'] and new_lang != st.session_state.lang:
+        st.session_state.lang = new_lang
+        st.rerun()
+
 T = TEXTS[st.session_state.lang]
 
 # CSS
@@ -90,26 +98,27 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えを右上に固定 */
-    .lang-switch-wrapper {
+    /* 言語切り替えを右上に配置（iframeを使わず直接HTMLで記述） */
+    .custom-lang-switch {
         position: fixed;
-        top: 15px;
-        right: 15px;
+        top: 20px;
+        right: 20px;
         z-index: 10000;
+        font-size: 0.8rem;
+        color: #555;
     }
-    .lang-switch-wrapper select {
-        background: transparent !important;
-        color: #555555 !important;
-        border: none !important;
-        font-size: 0.75rem !important;
+    .custom-lang-switch a {
+        color: #555;
+        text-decoration: none;
+        transition: color 0.2s;
         cursor: pointer;
-        outline: none;
-        appearance: none;
-        -webkit-appearance: none;
-        text-align: right;
     }
-    .lang-switch-wrapper select:hover {
-        color: #ffffff !important;
+    .custom-lang-switch a:hover {
+        color: #fff;
+    }
+    .custom-lang-switch .active {
+        color: #fff;
+        font-weight: 600;
     }
 
     /* Streamlit標準要素の非表示 */
@@ -120,32 +129,14 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# JavaScriptによる言語切り替え（Streamlitのウィジェットを使わない）
-st.components.v1.html(f"""
-    <div class="lang-switch-wrapper" style="position: fixed; top: 15px; right: 15px; z-index: 10000;">
-        <select id="lang-select" style="background: transparent; color: #555; border: none; font-size: 12px; cursor: pointer; outline: none; font-family: sans-serif;">
-            <option value="JP" {'selected' if st.session_state.lang == 'JP' else ''}>日本語</option>
-            <option value="EN" {'selected' if st.session_state.lang == 'EN' else ''}>English</option>
-        </select>
+# 言語切り替え（URLパラメータを使用するシンプルなリンク形式）
+st.markdown(f"""
+    <div class="custom-lang-switch">
+        <a href="?lang=jp" class="{'active' if st.session_state.lang == 'JP' else ''}">日本語</a>
+        <span style="margin: 0 5px; opacity: 0.3;">|</span>
+        <a href="?lang=en" class="{'active' if st.session_state.lang == 'EN' else ''}">English</a>
     </div>
-    <script>
-    const select = document.getElementById('lang-select');
-    select.onchange = (e) => {{
-        window.parent.postMessage({{
-            type: 'streamlit:set_component_value',
-            value: e.target.value,
-            key: 'lang_msg'
-        }}, '*');
-    }};
-    select.onmouseover = () => select.style.color = '#fff';
-    select.onmouseout = () => select.style.color = '#555';
-    </script>
-""", height=30)
-
-# メッセージ受信による言語更新
-if st.session_state.get('lang_msg') and st.session_state.lang_msg != st.session_state.lang:
-    st.session_state.lang = st.session_state.lang_msg
-    st.rerun()
+""", unsafe_allow_html=True)
 
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title">{T["subtitle"]}</p>', unsafe_allow_html=True)
@@ -263,7 +254,7 @@ if uploaded_file:
             </script>
         """, height=160)
         
-        st.download_button("📥 Download Enhanced Audio", res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
+        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
     else:
         st.info(T['info_msg'])
 
