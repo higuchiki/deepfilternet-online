@@ -13,6 +13,7 @@ from df.enhance import enhance, init_df, load_audio, save_audio
 # モデルの初期化（キャッシュして高速化）
 @st.cache_resource
 def get_model():
+    # メモリ節約のため、Smallモデルを選択肢に入れることも検討できますが、まずは標準V3でチャンク化
     model, df_state, _ = init_df()
     return model, df_state
 
@@ -42,6 +43,12 @@ st.markdown("""
         padding-top: 4rem;
     }
 
+    /* サイドバー */
+    section[data-testid="stSidebar"] {
+        background-color: #111111 !important;
+        border-right: 1px solid #333333;
+    }
+    
     /* ヘッダー・タイトル */
     .main-title {
         font-weight: 800;
@@ -100,19 +107,6 @@ st.markdown("""
         margin-bottom: 0.8rem;
     }
     
-    /* 区切り線 */
-    hr {
-        border-color: #333333 !important;
-    }
-
-    /* 成功・エラーメッセージ */
-    .stAlert {
-        background-color: #0a0a0a !important;
-        color: #ffffff !important;
-        border: 1px solid #333333 !important;
-        border-radius: 8px !important;
-    }
-
     /* ダウンロードボタンのカスタマイズ */
     .stDownloadButton {
         text-align: center;
@@ -140,17 +134,39 @@ st.markdown("""
         box-shadow: 0 15px 40px rgba(255,255,255,0.15), 0 20px 50px rgba(0,0,0,0.6) !important;
         background: #ffffff !important;
     }
-    .stDownloadButton > button:active {
-        transform: translateY(0);
+
+    /* プログレスバー */
+    .stProgress > div > div > div > div {
+        background-color: #ffffff;
     }
 
-    /* 比較プレイヤーのスタイル */
-    .comparison-player {
-        background: #0a0a0a;
+    /* 処理中のローダーアニメーション */
+    .processing-container {
+        text-align: center;
         padding: 2rem;
-        border-radius: 12px;
+        background: #0a0a0a;
+        border-radius: 8px;
         border: 1px solid #333333;
         margin: 1rem 0;
+    }
+    .loader {
+        border: 3px solid #333333;
+        border-top: 3px solid #ffffff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .timer-text {
+        font-family: monospace;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #ffffff;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -180,7 +196,6 @@ if uploaded_file:
     )
     
     if st.button("Enhance Audio"):
-        # セッション状態をクリア
         if 'processed_data' in st.session_state:
             del st.session_state['processed_data']
             
@@ -189,64 +204,37 @@ if uploaded_file:
             with open(input_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             
-            # 処理中表示用のプレースホルダー
             processing_placeholder = st.empty()
             progress_bar = st.progress(0)
             
-            # ブラウザ側で動作するタイマーを埋め込む
-            # st.components.v1.html を使って完全に独立したサンドボックスで実行
+            start_time = time.time()
+            
             st.components.v1.html(f"""
-                <style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
-                .processing-container {{
-                    text-align: center;
-                    padding: 2rem;
-                    background: #0a0a0a;
-                    border-radius: 8px;
-                    border: 1px solid #333333;
-                    margin: 1rem 0;
-                    font-family: 'Inter', sans-serif;
-                }}
-                .loader {{
-                    border: 3px solid #333333;
-                    border-top: 3px solid #ffffff;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    animation: spin 1s linear infinite;
-                    margin: 0 auto 1rem;
-                }}
-                @keyframes spin {{
-                    0% {{ transform: rotate(0deg); }}
-                    100% {{ transform: rotate(360deg); }}
-                }}
-                .timer-text {{
-                    font-family: monospace;
-                    font-size: 1.5rem;
-                    font-weight: 600;
-                    color: #ffffff;
-                }}
-                </style>
-                <div class="processing-container">
-                    <div class="loader"></div>
-                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 0.5rem;">AI Processing...</div>
-                    <div class="timer-text" id="js-timer">0.0s</div>
-                </div>
+                <div id="timer-root"></div>
                 <script>
                 let start = Date.now();
-                setInterval(() => {{
-                    let elapsed = (Date.now() - start) / 1000;
-                    document.getElementById('js-timer').innerText = elapsed.toFixed(1) + 's';
-                }}, 100);
+                const root = document.getElementById('timer-root');
+                // Streamlitの親要素にスタイルを適用するためのハック
+                window.parent.document.querySelectorAll('.timer-text').forEach(el => {{
+                    setInterval(() => {{
+                        let elapsed = (Date.now() - start) / 1000;
+                        el.innerText = elapsed.toFixed(1) + 's';
+                    }}, 100);
+                }});
                 </script>
-            """, height=200)
+            """, height=0)
+
+            processing_placeholder.markdown(f"""
+                <div class="processing-container">
+                    <div class="loader"></div>
+                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 0.5rem;">AI Processing (Chunked Mode)...</div>
+                    <div class="timer-text">0.0s</div>
+                </div>
+            """, unsafe_allow_html=True)
 
             try:
                 # 1. 読み込みと変換
-                progress_bar.progress(20)
-                # ログ
-                print(f"Processing: {uploaded_file.name}")
-                
+                progress_bar.progress(10)
                 base, ext = os.path.splitext(input_path)
                 load_path = input_path
                 if ext.lower() in [".m4a", ".mp3", ".mp4", ".aac"]:
@@ -254,16 +242,38 @@ if uploaded_file:
                     subprocess.run(["ffmpeg", "-y", "-i", input_path, temp_wav], check=True, capture_output=True)
                     load_path = temp_wav
                 
-                audio, _ = load_audio(load_path, sr=df_state.sr())
+                audio, info = load_audio(load_path, sr=df_state.sr())
                 
-                # 2. ノイズ除去
-                progress_bar.progress(50)
+                # 2. チャンク処理によるノイズ除去
+                # メモリ節約のため、音声を分割して処理
+                chunk_size_sec = 30 # 30秒ごとに処理
+                sr = df_state.sr()
+                chunk_size_samples = chunk_size_sec * sr
+                total_samples = audio.shape[1]
+                
+                enhanced_chunks = []
+                num_chunks = int(np.ceil(total_samples / chunk_size_samples))
+                
                 proc_start = time.time()
-                enhanced = enhance(model, df_state, audio, atten_lim_db=atten_lim)
+                for i in range(num_chunks):
+                    start_sample = i * chunk_size_samples
+                    end_sample = min((i + 1) * chunk_size_samples, total_samples)
+                    
+                    audio_chunk = audio[:, start_sample:end_sample]
+                    
+                    # AI処理
+                    enhanced_chunk = enhance(model, df_state, audio_chunk, atten_lim_db=atten_lim)
+                    enhanced_chunks.append(enhanced_chunk)
+                    
+                    # 進捗更新 (10%から90%の間で動かす)
+                    p = 10 + int((i + 1) / num_chunks * 80)
+                    progress_bar.progress(p)
+                
+                # 結合
+                enhanced = torch.cat(enhanced_chunks, dim=1)
                 proc_duration = time.time() - proc_start
                 
                 # 3. 保存
-                progress_bar.progress(90)
                 output_path = os.path.join(tmpdirname, "enhanced.wav")
                 save_audio(output_path, enhanced, sr=df_state.sr())
                 
@@ -272,29 +282,25 @@ if uploaded_file:
                 with open(output_path, "rb") as f:
                     audio_bytes = f.read()
                 
-                # 結果をセッションに保存
                 st.session_state['processed_data'] = {
-                    'input_file': uploaded_file.getvalue(), # getbuffer() ではなく getvalue() を使用
+                    'input_file': uploaded_file.getvalue(),
                     'output_bytes': audio_bytes,
                     'filename': uploaded_file.name,
                     'duration': proc_duration
                 }
-                
-                # 完了したら再描画を促す
                 st.rerun()
                 
             except Exception as e:
                 st.error(f"Error: {e}")
+                processing_placeholder.empty()
 
     st.markdown("---")
     st.subheader("3. Results")
     
     if 'processed_data' in st.session_state:
         res = st.session_state['processed_data']
-        
         st.success(f"🎉 Success: Processed in {res['duration']:.1f}s")
         
-        # カスタム比較プレイヤーの作成
         input_b64 = base64.b64encode(res['input_file']).decode()
         output_b64 = base64.b64encode(res['output_bytes']).decode()
         
@@ -302,51 +308,30 @@ if uploaded_file:
             <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
             body {{ background-color: transparent; margin: 0; font-family: 'Inter', sans-serif; color: white; }}
-            .player-container {{
-                background: #0a0a0a;
-                border: 1px solid #333333;
-                border-radius: 12px;
-                padding: 1.5rem;
-            }}
+            .player-container {{ background: #0a0a0a; border: 1px solid #333333; border-radius: 12px; padding: 1.5rem; }}
             .controls {{ display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }}
-            .play-btn {{
-                background: white; border: none; border-radius: 50%; width: 40px; height: 40px;
-                cursor: pointer; display: flex; align-items: center; justify-content: center;
-            }}
+            .play-btn {{ background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; }}
             .play-btn svg {{ fill: black; width: 20px; height: 20px; }}
             .seek-bar {{ flex-grow: 1; cursor: pointer; accent-color: white; }}
-            .toggle-container {{
-                display: flex; background: #1a1a1a; border-radius: 8px; padding: 4px;
-                border: 1px solid #333; width: fit-content; margin: 0 auto;
-            }}
-            .toggle-btn {{
-                padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
-                transition: all 0.2s; border: none; background: transparent; color: #888;
-            }}
+            .toggle-container {{ display: flex; background: #1a1a1a; border-radius: 8px; padding: 4px; border: 1px solid #333; width: fit-content; margin: 0 auto; }}
+            .toggle-btn {{ padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; border: none; background: transparent; color: #888; }}
             .toggle-btn.active {{ background: #333; color: white; }}
             .time-display {{ font-family: monospace; font-size: 0.85rem; color: #888; min-width: 80px; }}
             </style>
-
             <div class="player-container">
                 <div class="controls">
-                    <button id="playBtn" class="play-btn">
-                        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <svg id="pauseIcon" style="display:none" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    </button>
+                    <button id="playBtn" class="play-btn"><svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIcon" style="display:none" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
                     <div class="time-display" id="currentTime">0:00</div>
                     <input type="range" id="seekBar" class="seek-bar" value="0" step="0.1">
                     <div class="time-display" id="totalTime">0:00</div>
                 </div>
-                
                 <div class="toggle-container">
                     <button id="origBtn" class="toggle-btn">Original Source</button>
                     <button id="enhBtn" class="toggle-btn active">AI Enhanced</button>
                 </div>
             </div>
-
             <audio id="audioOrig" src="data:audio/wav;base64,{input_b64}" preload="auto"></audio>
             <audio id="audioEnh" src="data:audio/wav;base64,{output_b64}" preload="auto"></audio>
-
             <script>
             const audioOrig = document.getElementById('audioOrig');
             const audioEnh = document.getElementById('audioEnh');
@@ -358,91 +343,26 @@ if uploaded_file:
             const totalTime = document.getElementById('totalTime');
             const origBtn = document.getElementById('origBtn');
             const enhBtn = document.getElementById('enhBtn');
-
             let isPlaying = false;
             let currentSource = 'enhanced';
-
-            // 初期状態の設定
             audioOrig.muted = true;
             audioEnh.muted = false;
-
-            function formatTime(secs) {{
-                const m = Math.floor(secs / 60);
-                const s = Math.floor(secs % 60);
-                return m + ":" + (s < 10 ? "0" + s : s);
-            }}
-
-            // 完全に同時に再生・停止を制御
+            function formatTime(secs) {{ const m = Math.floor(secs / 60); const s = Math.floor(secs % 60); return m + ":" + (s < 10 ? "0" + s : s); }}
             async function togglePlay() {{
-                if (isPlaying) {{
-                    audioOrig.pause();
-                    audioEnh.pause();
-                    playIcon.style.display = 'block';
-                    pauseIcon.style.display = 'none';
-                }} else {{
-                    // 両方を同時に再生開始（ブラウザの最適化を利用）
-                    await Promise.all([audioOrig.play(), audioEnh.play()]);
-                    playIcon.style.display = 'none';
-                    pauseIcon.style.display = 'block';
-                }}
+                if (isPlaying) {{ audioOrig.pause(); audioEnh.pause(); playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; }}
+                else {{ await Promise.all([audioOrig.play(), audioEnh.play()]); playIcon.style.display = 'none'; pauseIcon.style.display = 'block'; }}
                 isPlaying = !isPlaying;
             }}
-
             playBtn.onclick = togglePlay;
-
-            // ソース切り替え（ミュートの入れ替えだけで瞬時に切り替え）
-            origBtn.onclick = () => {{
-                currentSource = 'original';
-                origBtn.classList.add('active');
-                enhBtn.classList.remove('active');
-                audioOrig.muted = false;
-                audioEnh.muted = true;
-                // 万が一のズレを補正
-                audioOrig.currentTime = audioEnh.currentTime;
-            }};
-
-            enhBtn.onclick = () => {{
-                currentSource = 'enhanced';
-                enhBtn.classList.add('active');
-                origBtn.classList.remove('active');
-                audioEnh.muted = false;
-                audioOrig.muted = true;
-                // 万が一のズレを補正
-                audioEnh.currentTime = audioOrig.currentTime;
-            }};
-
-            audioEnh.onloadedmetadata = () => {{
-                totalTime.innerText = formatTime(audioEnh.duration);
-                seekBar.max = audioEnh.duration;
-            }};
-
-            // シークバーの更新はメインの音源に合わせる
-            audioEnh.ontimeupdate = () => {{
-                if (!isDragging) {{
-                    seekBar.value = audioEnh.currentTime;
-                    currentTime.innerText = formatTime(audioEnh.currentTime);
-                }}
-            }};
-
+            origBtn.onclick = () => {{ currentSource = 'original'; origBtn.classList.add('active'); enhBtn.classList.remove('active'); audioOrig.muted = false; audioEnh.muted = true; audioOrig.currentTime = audioEnh.currentTime; }};
+            enhBtn.onclick = () => {{ currentSource = 'enhanced'; enhBtn.classList.add('active'); origBtn.classList.remove('active'); audioEnh.muted = false; audioOrig.muted = true; audioEnh.currentTime = audioOrig.currentTime; }};
+            audioEnh.onloadedmetadata = () => {{ totalTime.innerText = formatTime(audioEnh.duration); seekBar.max = audioEnh.duration; }};
+            audioEnh.ontimeupdate = () => {{ if (!isDragging) {{ seekBar.value = audioEnh.currentTime; currentTime.innerText = formatTime(audioEnh.currentTime); }} }};
             let isDragging = false;
             seekBar.onmousedown = () => {{ isDragging = true; }};
             seekBar.onmouseup = () => {{ isDragging = false; }};
-
-            seekBar.oninput = () => {{
-                const val = seekBar.value;
-                audioEnh.currentTime = val;
-                audioOrig.currentTime = val;
-            }};
-
-            // 再生終了時の処理
-            audioEnh.onended = () => {{
-                isPlaying = false;
-                playIcon.style.display = 'block';
-                pauseIcon.style.display = 'none';
-                audioOrig.pause();
-                audioOrig.currentTime = 0;
-                audioEnh.currentTime = 0;
-            }};
+            seekBar.oninput = () => {{ const val = seekBar.value; audioEnh.currentTime = val; audioOrig.currentTime = val; }};
+            audioEnh.onended = () => {{ isPlaying = false; playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; audioOrig.pause(); audioOrig.currentTime = 0; audioEnh.currentTime = 0; }};
             </script>
         """, height=180)
         
@@ -450,8 +370,7 @@ if uploaded_file:
             label="📥 Download Enhanced Audio",
             data=res['output_bytes'],
             file_name=f"{os.path.splitext(res['filename'])[0]}_enhanced.wav",
-            mime="audio/wav",
-            use_container_width=False # CSSで制御
+            mime="audio/wav"
         )
     else:
         st.info("Upload audio and click 'Enhance Audio' to see results.")
