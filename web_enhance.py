@@ -321,16 +321,40 @@ if uploaded_file:
         st.markdown("<br>", unsafe_allow_html=True)
         st.subheader(T['step3'])
         res = st.session_state['processed_data']
-        st.markdown(f"""
-            <div class="success-box">
-                <div class="status">Success</div>
-                <div class="time">{res['time']:.1f}s</div>
-            </div>
-        """, unsafe_allow_html=True)
         
+        # 成功メッセージとプレイヤーを1つのHTMLユニットに統合して同時表示
         st.components.v1.html(f"""
             <style>
-            body {{ background: transparent; margin: 0; font-family: 'Geist', sans-serif; color: white; }}
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Geist:wght@400;600&display=swap');
+            body {{ background: transparent; margin: 0; font-family: 'Inter', sans-serif; color: white; }}
+            
+            /* 成功メッセージのスタイル */
+            .success-box {{
+                padding: 1.25rem;
+                background: #0a0a0a;
+                border-radius: 8px;
+                border: 1px solid #333333;
+                margin-bottom: 1.5rem;
+                text-align: left;
+                max-width: fit-content;
+                min-width: 120px;
+            }}
+            .success-box .status {{
+                font-weight: 600;
+                font-size: 0.85rem;
+                color: #ffffff;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 0.25rem;
+            }}
+            .success-box .time {{
+                font-family: monospace;
+                font-size: 1.1rem;
+                color: #ffffff;
+                font-weight: 500;
+            }}
+
+            /* プレイヤーのスタイル */
             .player {{ background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; max-width: 600px; }}
             .ctrl {{ display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }}
             .p-btn {{ background: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; }}
@@ -338,20 +362,27 @@ if uploaded_file:
             .tgl-c {{ display: flex; background: #111; border-radius: 6px; padding: 3px; border: 1px solid #333; width: fit-content; }}
             .tgl {{ padding: 6px 14px; border-radius: 4px; cursor: pointer; border: none; background: transparent; color: #888; font-size: 0.8rem; font-weight: 500; }}
             .tgl.active {{ background: #333; color: white; }}
-            .time {{ font-family: monospace; font-size: 0.75rem; color: #888; }}
+            .time-disp {{ font-family: monospace; font-size: 0.75rem; color: #888; }}
             </style>
+
+            <div class="success-box">
+                <div class="status">Success</div>
+                <div class="time">{res['time']:.1f}s</div>
+            </div>
+
             <div class="player">
                 <div class="ctrl">
                     <button id="p" class="p-btn">▶</button>
-                    <span id="ct" class="time">0:00</span>
+                    <span id="ct" class="time-disp">0:00</span>
                     <input type="range" id="s" class="sk" value="0" step="0.1">
-                    <span id="tt" class="time">0:00</span>
+                    <span id="tt" class="time-disp">0:00</span>
                 </div>
                 <div class="tgl-c">
                     <button id="b1" class="tgl">{T['input_label']}</button>
                     <button id="b2" class="tgl active">{T['output_label']}</button>
                 </div>
             </div>
+
             <audio id="a1" src="data:audio/wav;base64,{res['in_b64']}" preload="auto"></audio>
             <audio id="a2" src="data:audio/wav;base64,{res['out_b64']}" preload="auto"></audio>
             <script>
@@ -365,7 +396,9 @@ if uploaded_file:
             a2.ontimeupdate=()=>{{ s.value=a2.currentTime; ct.innerText=fmt(a2.currentTime); }};
             s.oninput=()=>{{ a1.currentTime=a2.currentTime=s.value; }};
             </script>
-        """, height=160)
+        """, height=280)
+        
+        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
         
         st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
 
