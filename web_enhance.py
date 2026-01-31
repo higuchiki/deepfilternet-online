@@ -438,7 +438,12 @@ st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 st.divider()
 
 with st.expander("ドキュメント・技術仕様を表示"):
-    st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;margin-bottom:1.5rem;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
+    st.markdown(f"""
+        <div style="text-align:left; color:#888; font-size:0.85rem; margin-bottom:1.5rem; line-height:1.6;">
+            {T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff; text-decoration:none; font-weight:600;">Hendrik Schröter (Rikorose)</a><br>
+            Developed by <a href="https://x.com/HiguchiKi" target="_blank" style="color:#fff; text-decoration:none; font-weight:600;">@HiguchiKi</a>
+        </div>
+    """, unsafe_allow_html=True)
     
     exp_col1, exp_col2 = st.columns(2)
     with exp_col1:
