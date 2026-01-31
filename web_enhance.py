@@ -91,7 +91,7 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えボタンを右上に配置 */
+    /* 言語切り替えテキストを右上に配置 */
     .lang-switch-wrapper {
         display: flex;
         justify-content: flex-end;
@@ -101,16 +101,24 @@ st.markdown("""
     .lang-switch-wrapper .stButton > button {
         background-color: transparent !important;
         color: #888888 !important;
-        border: 1px solid #333333 !important;
-        border-radius: 6px !important;
-        height: 2rem !important;
+        border: none !important;
+        border-radius: 0 !important;
+        height: auto !important;
         width: auto !important;
-        padding: 0 1rem !important;
-        font-size: 0.8rem !important;
+        padding: 0 !important;
+        font-size: 0.85rem !important;
+        font-weight: 400 !important;
+        text-decoration: none !important;
+        box-shadow: none !important;
+        transition: color 0.2s ease;
     }
     .lang-switch-wrapper .stButton > button:hover {
         color: #ffffff !important;
-        border-color: #ffffff !important;
+        background-color: transparent !important;
+        text-decoration: underline !important;
+    }
+    .lang-switch-wrapper .stButton > button:active {
+        background-color: transparent !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
