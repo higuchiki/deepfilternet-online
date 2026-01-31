@@ -50,7 +50,7 @@ TEXTS = {
         'btn_download': '📥 除去済み音声をダウンロード',
         'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
         'powered_by': 'Powered by',
-        'lang_btn': 'Language: English'
+        'lang_btn': 'English'
     },
     'EN': {
         'title': 'DeepFilterNet AI Enhancer',
@@ -72,7 +72,7 @@ TEXTS = {
         'btn_download': '📥 Download Enhanced Audio',
         'info_msg': "Upload and click 'Enhance Audio' to see results.",
         'powered_by': 'Powered by',
-        'lang_btn': 'Language: 日本語'
+        'lang_btn': '日本語'
     }
 }
 
@@ -92,51 +92,29 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えセレクトボックスを右上に固定 */
+    /* 言語切り替えテキストを右上に固定 */
     .lang-switch-container {
         position: fixed;
-        top: 10px;
-        right: 10px;
+        top: 20px;
+        right: 20px;
         z-index: 999999;
-        width: 100px;
     }
-    /* Streamlitのデフォルトスタイルを強制的に上書き */
-    .lang-switch-container div[data-baseweb="select"] > div {
-        background-color: transparent !important;
+    .lang-switch-container .stButton > button {
+        background: transparent !important;
+        color: #555555 !important;
         border: none !important;
         box-shadow: none !important;
-        color: #555555 !important;
-        font-size: 0.75rem !important;
-        min-height: 0px !important;
-        height: 1.5rem !important;
+        font-size: 0.8rem !important;
+        font-weight: 400 !important;
+        padding: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        text-decoration: none !important;
     }
-    .lang-switch-container div[data-baseweb="select"]:hover div {
+    .lang-switch-container .stButton > button:hover {
         color: #ffffff !important;
-    }
-    .lang-switch-container svg {
-        fill: #555555 !important;
-        width: 14px !important;
-    }
-    .lang-switch-container div[data-baseweb="select"]:hover svg {
-        fill: #ffffff !important;
-    }
-    /* 選択後の青い枠線などを消す */
-    .lang-switch-container div[role="combobox"] {
-        outline: none !important;
-    }
-    /* 追加：ドロップダウンリスト自体のスタイルを調整（可能な場合） */
-    div[data-baseweb="popover"] {
-        background-color: #111111 !important;
-        border: 1px solid #333333 !important;
-    }
-    div[data-baseweb="popover"] li {
-        background-color: #111111 !important;
-        color: #888888 !important;
-        font-size: 0.75rem !important;
-    }
-    div[data-baseweb="popover"] li:hover {
-        background-color: #333333 !important;
-        color: #ffffff !important;
+        text-decoration: underline !important;
+        background: transparent !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
@@ -144,23 +122,14 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     div[data-testid="stDecoration"] {display: none;}
+    div[data-testid="stHeader"] {display: none;}
     </style>
 """, unsafe_allow_html=True)
 
-# 言語切り替え
+# 言語切り替え（シンプルなボタンに戻し、CSSでテキスト化）
 st.markdown('<div class="lang-switch-container">', unsafe_allow_html=True)
-lang_options = ['日本語', 'English']
-current_idx = 0 if st.session_state.lang == 'JP' else 1
-selected_lang = st.selectbox(
-    "Language Selector",
-    options=lang_options,
-    index=current_idx,
-    label_visibility="collapsed",
-    key="lang_selector"
-)
-new_lang_code = 'JP' if selected_lang == '日本語' else 'EN'
-if new_lang_code != st.session_state.lang:
-    st.session_state.lang = new_lang_code
+if st.button(st.session_state.lang == 'JP' and "English" or "日本語", key="lang_switcher"):
+    st.session_state.lang = 'EN' if st.session_state.lang == 'JP' else 'JP'
     st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
 
