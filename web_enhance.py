@@ -92,29 +92,24 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えテキストを右上に固定 */
+    /* 言語切り替えセレクトボックスを右上に固定 */
     .lang-switch-container {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 999999;
+        width: 120px;
     }
-    .lang-switch-container .stButton > button {
-        background: transparent !important;
+    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+        background-color: transparent !important;
+        border: 1px solid #333333 !important;
         color: #888888 !important;
-        border: none !important;
-        box-shadow: none !important;
-        font-size: 0.85rem !important;
-        font-weight: 400 !important;
-        padding: 0 !important;
-        width: auto !important;
-        height: auto !important;
-        text-decoration: none !important;
+        border-radius: 6px !important;
+        height: 2rem !important;
+        font-size: 0.8rem !important;
     }
-    .lang-switch-container .stButton > button:hover {
-        color: #ffffff !important;
-        text-decoration: underline !important;
-        background: transparent !important;
+    .lang-switch-container [data-testid="stSelectbox"] svg {
+        fill: #888888 !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
@@ -125,10 +120,20 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 言語切り替え（コンテナで包む）
+# 言語切り替え
 st.markdown('<div class="lang-switch-container">', unsafe_allow_html=True)
-if st.button(T['lang_btn'], key="lang_switcher"):
-    st.session_state.lang = 'EN' if st.session_state.lang == 'JP' else 'JP'
+lang_options = ['日本語', 'English']
+current_idx = 0 if st.session_state.lang == 'JP' else 1
+selected_lang = st.selectbox(
+    "Language Selector",
+    options=lang_options,
+    index=current_idx,
+    label_visibility="collapsed",
+    key="lang_selector"
+)
+new_lang_code = 'JP' if selected_lang == '日本語' else 'EN'
+if new_lang_code != st.session_state.lang:
+    st.session_state.lang = new_lang_code
     st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
 
