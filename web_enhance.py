@@ -252,10 +252,6 @@ st.markdown("""
         border: none !important;
         background: transparent !important;
         max-width: fit-content !important;
-        position: fixed;
-        bottom: 12px;
-        right: 230px; /* Xアイコンとテキストの横に配置 */
-        z-index: 999998;
     }
     .stExpander details {
         border: none !important;
