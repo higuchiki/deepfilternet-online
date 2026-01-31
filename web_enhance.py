@@ -150,6 +150,10 @@ st.markdown("""
         outline: none !important;
         box-shadow: none !important;
     }
+    /* さらに深い階層の背景も透明化 */
+    .lang-switch-container [data-baseweb="select"] > div > div {
+        background-color: transparent !important;
+    }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
