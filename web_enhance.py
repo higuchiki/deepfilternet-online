@@ -122,22 +122,24 @@ st.markdown("""
         background-color: transparent !important;
     }
     
-    /* ボタン (Vercelスタイル) */
-    .stButton > button {
+    /* 共通ボタンスタイル (Vercelスタイル) */
+    .stButton > button, .stDownloadButton > button {
         background-color: var(--accent) !important;
         color: #000000 !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
-        height: 2.5rem !important;
+        height: 2.8rem !important;
         width: auto !important;
-        min-width: 140px;
-        padding: 0 1.5rem !important;
+        min-width: 160px;
+        padding: 0 2rem !important;
         transition: opacity 0.2s ease;
         border: none !important;
-        margin-left: 0 !important;
+        margin-top: 1rem !important;
     }
-    .stButton > button:hover {
+    .stButton > button:hover, .stDownloadButton > button:hover {
         opacity: 0.9;
+        background-color: var(--accent) !important;
+        color: #000000 !important;
     }
 
     /* スライダー */
@@ -163,25 +165,6 @@ st.markdown("""
         margin-bottom: 0.8rem;
     }
     
-    /* ダウンロードボタン (Vercelスタイル) */
-    .stDownloadButton > button {
-        width: auto !important;
-        min-width: 200px !important;
-        padding: 0.6rem 1.5rem !important;
-        background-color: transparent !important;
-        color: #ffffff !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 6px !important;
-        font-size: 0.9rem !important;
-        font-weight: 500 !important;
-        margin-top: 1rem !important;
-        transition: background 0.2s ease;
-    }
-    .stDownloadButton > button:hover {
-        background-color: #111111 !important;
-        border-color: #555555 !important;
-    }
-
     /* Streamlit要素の非表示 */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
         display: none !important;
