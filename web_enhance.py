@@ -10,7 +10,7 @@ import threading
 import base64
 from df.enhance import enhance, init_df, load_audio, save_audio
 
-# モデルの初期化（キャッシュして高速化）
+# モデルの初期化
 @st.cache_resource
 def get_model():
     model, df_state, _ = init_df()
@@ -76,7 +76,7 @@ TEXTS = {
 
 T = TEXTS[st.session_state.lang]
 
-# Next.js Docs 風のダークモード・ミニマルデザイン
+# CSS
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -90,60 +90,62 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えセレクトボックスを右上に固定 */
-    .lang-switch-container {
+    /* 言語切り替えを右上に固定 */
+    .lang-switch-wrapper {
         position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 999999;
-        width: 120px;
+        top: 15px;
+        right: 15px;
+        z-index: 10000;
     }
-    /* Streamlitのセレクトボックスを極限までシンプルにする */
-    .lang-switch-container div[data-baseweb="select"] {
-        background-color: transparent !important;
-        border: none !important;
-    }
-    .lang-switch-container div[data-baseweb="select"] > div {
-        background-color: transparent !important;
-        border: none !important;
+    .lang-switch-wrapper select {
+        background: transparent !important;
         color: #555555 !important;
-        font-size: 0.8rem !important;
-        padding-right: 0 !important;
+        border: none !important;
+        font-size: 0.75rem !important;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+        text-align: right;
     }
-    .lang-switch-container div[data-baseweb="select"]:hover div {
+    .lang-switch-wrapper select:hover {
         color: #ffffff !important;
     }
-    .lang-switch-container svg {
-        fill: #555555 !important;
-    }
-    .lang-switch-container div[data-baseweb="select"]:hover svg {
-        fill: #ffffff !important;
-    }
 
-    /* Streamlit標準のヘッダー・フッターを非表示にする */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    div[data-testid="stDecoration"] {display: none;}
-    div[data-testid="stHeader"] {display: none;}
+    /* Streamlit標準要素の非表示 */
+    #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
+        visibility: hidden;
+        display: none;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# 言語切り替え（セレクトボックス）
-st.markdown('<div class="lang-switch-container">', unsafe_allow_html=True)
-lang_map = {'日本語': 'JP', 'English': 'EN'}
-inv_lang_map = {v: k for k, v in lang_map.items()}
-selected_lang_name = st.selectbox(
-    "Language",
-    options=list(lang_map.keys()),
-    index=list(lang_map.values()).index(st.session_state.lang),
-    label_visibility="collapsed",
-    key="lang_selector"
-)
-if lang_map[selected_lang_name] != st.session_state.lang:
-    st.session_state.lang = lang_map[selected_lang_name]
+# JavaScriptによる言語切り替え（Streamlitのウィジェットを使わない）
+st.components.v1.html(f"""
+    <div class="lang-switch-wrapper" style="position: fixed; top: 15px; right: 15px; z-index: 10000;">
+        <select id="lang-select" style="background: transparent; color: #555; border: none; font-size: 12px; cursor: pointer; outline: none; font-family: sans-serif;">
+            <option value="JP" {'selected' if st.session_state.lang == 'JP' else ''}>日本語</option>
+            <option value="EN" {'selected' if st.session_state.lang == 'EN' else ''}>English</option>
+        </select>
+    </div>
+    <script>
+    const select = document.getElementById('lang-select');
+    select.onchange = (e) => {{
+        window.parent.postMessage({{
+            type: 'streamlit:set_component_value',
+            value: e.target.value,
+            key: 'lang_msg'
+        }}, '*');
+    }};
+    select.onmouseover = () => select.style.color = '#fff';
+    select.onmouseout = () => select.style.color = '#555';
+    </script>
+""", height=30)
+
+# メッセージ受信による言語更新
+if st.session_state.get('lang_msg') and st.session_state.lang_msg != st.session_state.lang:
+    st.session_state.lang = st.session_state.lang_msg
     st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title">{T["subtitle"]}</p>', unsafe_allow_html=True)
