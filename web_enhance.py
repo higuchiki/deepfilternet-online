@@ -24,196 +24,50 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 言語設定の初期化
-if 'lang' not in st.session_state:
-    st.session_state.lang = 'JP'
-
-# テキスト辞書
-TEXTS = {
-    'JP': {
-        'title': 'DeepFilterNet AI 音声ノイズ除去',
-        'subtitle': 'AI技術を駆使した、プロフェッショナル仕様のノイズ除去ツール。',
-        'step1': '1. 音声をアップロード',
-        'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
-        'step2': '2. 設定',
-        'atten_label': 'ノイズ除去の強度制限 (dB)',
-        'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
-        'btn_enhance': '✨ ノイズを除去する',
-        'status_preparing': '音声を準備中...',
-        'status_processing': 'AIがノイズを除去中 (分割処理モード)...',
-        'status_saving': '結果を生成中...',
-        'status_done': '完了！ 処理時間: {duration:.1f}秒',
-        'step3': '3. 処理結果',
-        'success_msg': '🎉 成功: {duration:.1f}秒で処理が完了しました',
-        'input_label': '元の音源',
-        'output_label': 'AI除去後',
-        'btn_download': '📥 除去済み音声をダウンロード',
-        'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
-        'powered_by': 'Powered by',
-    },
-    'EN': {
-        'title': 'DeepFilterNet AI Enhancer',
-        'subtitle': 'Professional noise suppression powered by state-of-the-art AI.',
-        'step1': '1. Upload Audio',
-        'uploader_label': 'Select WAV, M4A, MP3, or AAC file',
-        'step2': '2. Configuration',
-        'atten_label': 'Noise Reduction Limit (dB)',
-        'atten_help': 'Lower values mean stronger noise reduction. 0dB is recommended.',
-        'btn_enhance': '✨ Enhance Audio',
-        'status_preparing': 'Preparing audio...',
-        'status_processing': 'AI Processing (Chunked Mode)...',
-        'status_saving': 'Generating results...',
-        'status_done': 'Done! Processed in {duration:.1f}s',
-        'step3': '3. Results',
-        'success_msg': '🎉 Success: Processed in {duration:.1f}s',
-        'input_label': 'Input Source',
-        'output_label': 'AI Enhanced',
-        'btn_download': '📥 Download Enhanced Audio',
-        'info_msg': "Upload and click 'Enhance Audio' to see results.",
-        'powered_by': 'Powered by',
-    }
+# テキスト辞書（日本語固定）
+T = {
+    'title': 'DeepFilterNet AI 音声ノイズ除去',
+    'subtitle': 'AI技術を駆使した、プロフェッショナル仕様のノイズ除去ツール。',
+    'step1': '1. 音声をアップロード',
+    'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
+    'step2': '2. 設定',
+    'atten_label': 'ノイズ除去の強度制限 (dB)',
+    'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
+    'btn_enhance': '✨ ノイズを除去する',
+    'status_preparing': '音声を準備中...',
+    'status_processing': 'AIがノイズを除去中 (分割処理モード)...',
+    'status_saving': '結果を生成中...',
+    'status_done': '完了！ 処理時間: {duration:.1f}秒',
+    'step3': '3. 処理結果',
+    'success_msg': '🎉 成功: {duration:.1f}秒で処理が完了しました',
+    'input_label': '元の音源',
+    'output_label': 'AI除去後',
+    'btn_download': '📥 除去済み音声をダウンロード',
+    'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
+    'powered_by': 'Powered by',
 }
-
-T = TEXTS[st.session_state.lang]
 
 # CSS
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
     .stApp { background-color: #000000; color: #ededed; font-family: 'Inter', sans-serif; }
-    .main .block-container { max-width: 800px; padding-top: 2rem; }
+    .main .block-container { max-width: 800px; padding-top: 4rem; }
     .main-title { font-weight: 800; font-size: 2.5rem !important; letter-spacing: -0.05em; margin-bottom: 0.5rem; color: #ffffff; text-align: center; }
-    .sub-title { color: #888888; font-size: 1.1rem; margin-bottom: 2rem; text-align: center; }
+    .sub-title { color: #888888; font-size: 1.1rem; margin-bottom: 3rem; text-align: center; }
     .stFileUploader { border: 1px solid #333333 !important; border-radius: 8px !important; background-color: #0a0a0a !important; padding: 1rem !important; }
     .stButton > button { background-color: #ffffff !important; color: #000000 !important; border-radius: 6px !important; font-weight: 600 !important; height: 3rem; width: 100%; transition: all 0.2s ease; border: none; }
     .audio-card { background: #0a0a0a; padding: 1.2rem; border-radius: 8px; border: 1px solid #333333; margin-bottom: 1rem; }
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えセレクトボックスを右上に固定 */
-    .lang-switch-container {
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        background: transparent !important;
-    }
-    .lang-switch-container .lang-label {
-        font-size: 0.7rem;
-        color: #555;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    /* Streamlitのセレクトボックスを完全に透明化し、テキストのみにする */
-    .lang-switch-container [data-testid="stSelectbox"] {
-        width: 100px !important;
-        background-color: transparent !important;
-    }
-    .lang-switch-container [data-testid="stSelectbox"] > div > div {
-        background-color: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-    }
-    /* セレクトボックスの表示テキスト部分 */
-    .lang-switch-container [data-baseweb="select"] {
-        background-color: transparent !important;
-        border: none !important;
-    }
-    .lang-switch-container [data-baseweb="select"] > div {
-        background-color: transparent !important;
-        border: none !important;
-        color: #555555 !important;
-        font-size: 0.8rem !important;
-        padding: 0 !important;
-        min-height: 0 !important;
-        box-shadow: none !important;
-    }
-    /* ホバー時の色変更 */
-    .lang-switch-container [data-baseweb="select"]:hover > div {
-        color: #ffffff !important;
-    }
-    /* 矢印アイコンを消す */
-    .lang-switch-container [data-baseweb="select"] > div:last-child {
-        display: none !important;
-    }
-    /* 選択後の青い枠線（フォーカス）を消す */
-    .lang-switch-container [data-baseweb="select"]:focus,
-    .lang-switch-container [data-baseweb="select"]:active,
-    .lang-switch-container [data-baseweb="select"] > div {
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-    }
-    /* さらに深い階層の背景も透明化 */
-    .lang-switch-container [data-baseweb="select"] > div,
-    .lang-switch-container [data-baseweb="select"] > div > div {
-        background-color: transparent !important;
-        border: none !important;
-    }
-    /* 選択肢のリスト（ポップオーバー）のスタイル */
-    div[data-baseweb="popover"] {
-        background-color: #111111 !important;
-        border: 1px solid #333333 !important;
-    }
-    div[data-baseweb="popover"] li {
-        background-color: #111111 !important;
-        color: #888888 !important;
-        font-size: 0.8rem !important;
-    }
-    div[data-baseweb="popover"] li:hover {
-        background-color: #333333 !important;
-        color: #ffffff !important;
-    }
-    /* 追加：特定のクラス名を持つ要素をターゲットにする */
-    .lang-switch-container .stSelectbox div[role="button"] {
-        background-color: transparent !important;
-        border: none !important;
-    }
-    /* 最終手段：すべての背景色を強制的に透明にする */
-    .lang-switch-container * {
-        background-color: transparent !important;
-        border-color: transparent !important;
-        box-shadow: none !important;
-    }
-    /* 矢印アイコンを消す（さらにミニマルに） */
-    .lang-switch-container svg {
-        display: none !important;
-    }
-    /* プレースホルダーテキストの色（もしあれば） */
-    .lang-switch-container div[data-baseweb="select"] div {
-        color: #555555 !important;
-    }
-    .lang-switch-container div[data-baseweb="select"]:hover div {
-        color: #ffffff !important;
-    }
-
-    /* Streamlit標準のヘッダー・フッターを非表示にする */
+    /* Streamlit標準要素の非表示 */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
         visibility: hidden;
         display: none;
     }
     </style>
 """, unsafe_allow_html=True)
-
-# 言語切り替え
-st.markdown('<div class="lang-switch-container"><span class="lang-label">Lang:</span>', unsafe_allow_html=True)
-lang_options = ['🇯🇵 JP', '🇺🇸 EN']
-current_idx = 0 if st.session_state.lang == 'JP' else 1
-selected_lang_name = st.selectbox(
-    "Language Selector",
-    options=lang_options,
-    index=current_idx,
-    label_visibility="collapsed",
-    key="lang_selector_final"
-)
-new_lang_code = 'JP' if 'JP' in selected_lang_name else 'EN'
-if new_lang_code != st.session_state.lang:
-    st.session_state.lang = new_lang_code
-    st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title">{T["subtitle"]}</p>', unsafe_allow_html=True)
