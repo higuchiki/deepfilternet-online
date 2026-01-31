@@ -100,27 +100,29 @@ st.markdown("""
         z-index: 999999;
         width: 100px;
     }
-    .lang-switch-container [data-testid="stSelectbox"] {
-        min-height: 0px !important;
-    }
-    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+    /* Streamlitのデフォルトスタイルを強制的に上書き */
+    .lang-switch-container div[data-baseweb="select"] > div {
         background-color: transparent !important;
         border: none !important;
+        box-shadow: none !important;
         color: #555555 !important;
         font-size: 0.75rem !important;
+        min-height: 0px !important;
         height: 1.5rem !important;
-        padding: 0 !important;
     }
-    .lang-switch-container [data-testid="stSelectbox"] svg {
-        fill: #555555 !important;
-        width: 12px !important;
-        height: 12px !important;
-    }
-    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover > div {
+    .lang-switch-container div[data-baseweb="select"]:hover div {
         color: #ffffff !important;
     }
-    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover svg {
+    .lang-switch-container svg {
+        fill: #555555 !important;
+        width: 14px !important;
+    }
+    .lang-switch-container div[data-baseweb="select"]:hover svg {
         fill: #ffffff !important;
+    }
+    /* 選択後の青い枠線などを消す */
+    .lang-switch-container div[role="combobox"] {
+        outline: none !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
