@@ -6,7 +6,6 @@ import numpy as np
 import time
 import tempfile
 import subprocess
-import threading
 import base64
 from df.enhance import enhance, init_df, load_audio, save_audio
 
@@ -54,7 +53,7 @@ except Exception as e:
     st.stop()
 
 st.subheader("1. Upload Audio")
-uploaded_file = st.file_uploader("", type=["wav", "m4a", "mp3", "aac"])
+uploaded_file = st.file_uploader("Choose an audio file", type=["wav", "m4a", "mp3", "aac"], label_visibility="collapsed")
 
 if uploaded_file:
     st.markdown("---")
@@ -186,7 +185,7 @@ if uploaded_file:
             </script>
         """, height=160)
         
-        st.download_button("📥 Download Enhanced Audio", res['output'], f"{res['name']}_enhanced.wav", "audio/wav")
+        st.download_button("📥 Download Enhanced Audio", res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
     else:
         st.info("Upload and click 'Enhance Audio'.")
 
