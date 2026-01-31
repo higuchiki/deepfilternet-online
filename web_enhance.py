@@ -294,21 +294,25 @@ if uploaded_file:
                         with open(output_path, "rb") as f:
                             audio_bytes = f.read()
                         
-                        # タイムラグを減らすため、ここでBase64エンコードを済ませておく
-                        st.write("プレイヤーを準備中...")
-                        in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
-                        out_b64 = base64.b64encode(audio_bytes).decode()
-                        
-                        st.session_state['processed_data'] = {
-                            'in_b64': in_b64,
-                            'out_b64': out_b64,
-                            'output': audio_bytes,
-                            'name': uploaded_file.name,
-                            'time': proc_duration
-                        }
-                        status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
+                    # タイムラグを減らすため、ここでBase64エンコードを済ませておく
+                    st.write("プレイヤーを準備中...")
+                    in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
+                    out_b64 = base64.b64encode(audio_bytes).decode()
+                    
+                    st.session_state['processed_data'] = {
+                        'in_b64': in_b64,
+                        'out_b64': out_b64,
+                        'output': audio_bytes,
+                        'name': uploaded_file.name,
+                        'time': proc_duration
+                    }
+                    status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
+                    
+                    # Success表示直後にプレイヤーが出るまでの間に空のプレースホルダーでローディングを維持
+                    with st.spinner("結果を表示しています..."):
+                        time.sleep(0.5) # 描画の安定化のためのわずかな待ち時間
                         st.rerun()
-                        
+
                     except Exception as e:
                         st.error(f"Error: {e}")
                         status.update(label="❌ Error", state="error")
