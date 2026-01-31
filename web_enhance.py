@@ -124,6 +124,20 @@ st.markdown("""
     .lang-switch-container div[role="combobox"] {
         outline: none !important;
     }
+    /* 追加：ドロップダウンリスト自体のスタイルを調整（可能な場合） */
+    div[data-baseweb="popover"] {
+        background-color: #111111 !important;
+        border: 1px solid #333333 !important;
+    }
+    div[data-baseweb="popover"] li {
+        background-color: #111111 !important;
+        color: #888888 !important;
+        font-size: 0.75rem !important;
+    }
+    div[data-baseweb="popover"] li:hover {
+        background-color: #333333 !important;
+        color: #ffffff !important;
+    }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu {visibility: hidden;}
