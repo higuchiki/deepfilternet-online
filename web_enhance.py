@@ -143,6 +143,15 @@ st.markdown("""
         justify-content: center !important;
         font-family: 'Geist', 'Noto Sans JP', sans-serif !important;
     }
+    /* ボタン内部のテキスト要素（p, span等）に対しても強制的にセミボールドを適用 */
+    .stButton > button *, 
+    .stDownloadButton > button *, 
+    button[data-testid="stBaseButton-secondary"]:not([aria-label="Remove file"]) *,
+    div[data-testid="stFileUploader"] button[data-testid="stBaseButton-secondary"] * {
+        font-weight: 600 !important;
+        color: inherit !important;
+        font-family: inherit !important;
+    }
     .stButton > button:hover, 
     .stDownloadButton > button:hover, 
     button[data-testid="stBaseButton-secondary"]:not([aria-label="Remove file"]):hover,
