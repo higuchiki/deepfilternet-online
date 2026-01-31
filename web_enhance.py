@@ -50,7 +50,6 @@ TEXTS = {
         'btn_download': '📥 除去済み音声をダウンロード',
         'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
         'powered_by': 'Powered by',
-        'lang_btn': 'English'
     },
     'EN': {
         'title': 'DeepFilterNet AI Enhancer',
@@ -72,7 +71,6 @@ TEXTS = {
         'btn_download': '📥 Download Enhanced Audio',
         'info_msg': "Upload and click 'Enhance Audio' to see results.",
         'powered_by': 'Powered by',
-        'lang_btn': '日本語'
     }
 }
 
@@ -92,29 +90,34 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えテキストを右上に固定 */
+    /* 言語切り替えセレクトボックスを右上に固定 */
     .lang-switch-container {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 999999;
+        width: 120px;
     }
-    .lang-switch-container .stButton > button {
-        background: transparent !important;
-        color: #555555 !important;
+    /* Streamlitのセレクトボックスを極限までシンプルにする */
+    .lang-switch-container div[data-baseweb="select"] {
+        background-color: transparent !important;
         border: none !important;
-        box-shadow: none !important;
-        font-size: 0.8rem !important;
-        font-weight: 400 !important;
-        padding: 0 !important;
-        width: auto !important;
-        height: auto !important;
-        text-decoration: none !important;
     }
-    .lang-switch-container .stButton > button:hover {
+    .lang-switch-container div[data-baseweb="select"] > div {
+        background-color: transparent !important;
+        border: none !important;
+        color: #555555 !important;
+        font-size: 0.8rem !important;
+        padding-right: 0 !important;
+    }
+    .lang-switch-container div[data-baseweb="select"]:hover div {
         color: #ffffff !important;
-        text-decoration: underline !important;
-        background: transparent !important;
+    }
+    .lang-switch-container svg {
+        fill: #555555 !important;
+    }
+    .lang-switch-container div[data-baseweb="select"]:hover svg {
+        fill: #ffffff !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
@@ -126,10 +129,19 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 言語切り替え（シンプルなボタンに戻し、CSSでテキスト化）
+# 言語切り替え（セレクトボックス）
 st.markdown('<div class="lang-switch-container">', unsafe_allow_html=True)
-if st.button(st.session_state.lang == 'JP' and "English" or "日本語", key="lang_switcher"):
-    st.session_state.lang = 'EN' if st.session_state.lang == 'JP' else 'JP'
+lang_map = {'日本語': 'JP', 'English': 'EN'}
+inv_lang_map = {v: k for k, v in lang_map.items()}
+selected_lang_name = st.selectbox(
+    "Language",
+    options=list(lang_map.keys()),
+    index=list(lang_map.values()).index(st.session_state.lang),
+    label_visibility="collapsed",
+    key="lang_selector"
+)
+if lang_map[selected_lang_name] != st.session_state.lang:
+    st.session_state.lang = lang_map[selected_lang_name]
     st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -249,7 +261,7 @@ if uploaded_file:
             </script>
         """, height=160)
         
-        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
+        st.download_button("📥 Download Enhanced Audio", res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
     else:
         st.info(T['info_msg'])
 
