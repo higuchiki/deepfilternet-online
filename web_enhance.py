@@ -35,6 +35,7 @@ T = {
     'step1': '1. 音源をアップロード',
     'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
     'step2': '2. 除去強度の設定',
+    'step2_hint': '※わからなければ初期設定のままで良いです',
     'atten_label': 'ノイズ除去の制限 (dB)',
     'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
     'btn_enhance': '✨ クリアな音声を生成する',
@@ -207,6 +208,7 @@ with col_up1:
 if uploaded_file:
     st.markdown("<br>", unsafe_allow_html=True)
     st.subheader(T['step2'])
+    st.markdown(f'<p style="color: var(--muted); font-size: 0.85rem; margin-top: -0.5rem; margin-bottom: 1rem;">{T["step2_hint"]}</p>', unsafe_allow_html=True)
     col_conf1, col_conf2 = st.columns([2, 1])
     with col_conf1:
         atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
