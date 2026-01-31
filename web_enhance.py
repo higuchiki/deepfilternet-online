@@ -318,16 +318,25 @@ if uploaded_file:
                         status.update(label="❌ Error", state="error")
 
     if 'processed_data' in st.session_state:
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.subheader(T['step3'])
         res = st.session_state['processed_data']
         
-        # 成功メッセージとプレイヤーを1つのHTMLユニットに統合して同時表示
+        # 見出し、成功メッセージ、プレイヤーを1つのHTMLユニットに統合して同時表示
         st.components.v1.html(f"""
             <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Geist:wght@400;600&display=swap');
-            body {{ background: transparent; margin: 0; font-family: 'Inter', sans-serif; color: white; }}
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Geist:wght@400;600&family=Noto+Sans+JP:wght@400;600&display=swap');
+            body {{ background: transparent; margin: 0; font-family: 'Geist', 'Noto Sans JP', sans-serif; color: white; }}
             
+            /* セクション見出しのスタイル */
+            .section-header {{
+                color: #ffffff;
+                font-weight: 600;
+                font-size: 1rem;
+                letter-spacing: 0.02em;
+                text-align: left;
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+            }}
+
             /* 成功メッセージのスタイル */
             .success-box {{
                 padding: 1.25rem;
@@ -365,6 +374,8 @@ if uploaded_file:
             .time-disp {{ font-family: monospace; font-size: 0.75rem; color: #888; }}
             </style>
 
+            <div class="section-header">{T['step3']}</div>
+
             <div class="success-box">
                 <div class="status">Success</div>
                 <div class="time">{res['time']:.1f}s</div>
@@ -396,7 +407,7 @@ if uploaded_file:
             a2.ontimeupdate=()=>{{ s.value=a2.currentTime; ct.innerText=fmt(a2.currentTime); }};
             s.oninput=()=>{{ a1.currentTime=a2.currentTime=s.value; }};
             </script>
-        """, height=280)
+        """, height=340)
         
         st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav", key="dl_btn_final")
 
