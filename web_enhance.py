@@ -154,6 +154,20 @@ st.markdown("""
     .lang-switch-container [data-baseweb="select"] > div > div {
         background-color: transparent !important;
     }
+    /* 選択肢のリスト（ポップオーバー）のスタイル */
+    div[data-baseweb="popover"] {
+        background-color: #111111 !important;
+        border: 1px solid #333333 !important;
+    }
+    div[data-baseweb="popover"] li {
+        background-color: #111111 !important;
+        color: #888888 !important;
+        font-size: 0.8rem !important;
+    }
+    div[data-baseweb="popover"] li:hover {
+        background-color: #333333 !important;
+        color: #ffffff !important;
+    }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
