@@ -123,7 +123,11 @@ st.markdown("""
     }
     
     /* 共通ボタンスタイル (Vercelスタイル) */
-    .stButton > button, .stDownloadButton > button, button[data-testid="stBaseButton-secondary"], div[data-testid="stFileUploader"] button {
+    .stButton > button, 
+    .stDownloadButton > button, 
+    button[data-testid="stBaseButton-secondary"], 
+    div[data-testid="stFileUploader"] button,
+    div[data-testid="stFileUploader"] button p {
         background-color: #ffffff !important;
         color: #000000 !important;
         border-radius: 6px !important;
@@ -138,6 +142,7 @@ st.markdown("""
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+        font-family: 'Geist', 'Noto Sans JP', sans-serif !important;
     }
     .stButton > button:hover, .stDownloadButton > button:hover, button[data-testid="stBaseButton-secondary"]:hover, div[data-testid="stFileUploader"] button:hover {
         background-color: #000000 !important;
