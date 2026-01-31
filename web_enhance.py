@@ -233,17 +233,17 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 8px;
+        background: transparent !important;
     }
     .x-link:hover {
         opacity: 1;
     }
-    .x-link::before {
-        content: "エラー報告・レビューはこちら";
+    .x-link .x-text {
         font-size: 0.7rem;
-        color: #555;
+        color: #888;
         white-space: nowrap;
     }
-    .x-link:hover::before {
+    .x-link:hover .x-text {
         color: #ffffff;
     }
 
@@ -276,10 +276,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Xアイコン（右上に固定）
+# Xアイコン（右下に固定）
 st.markdown(f"""
     <a href="https://x.com/HiguchiKi" target="_blank" class="x-link">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+        <span class="x-text">エラー報告・レビューはこちら</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
         </svg>
     </a>
