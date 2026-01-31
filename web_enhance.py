@@ -63,7 +63,7 @@ st.markdown("""
         --foreground: #ededed;
         --muted: #888888;
         --border: #333333;
-        --accent: #0070f3; /* Vercel Blue */
+        --accent: #ffffff;
     }
 
     .stApp {
@@ -123,23 +123,39 @@ st.markdown("""
     }
     
     /* 共通ボタンスタイル (Vercelスタイル) */
-    .stButton > button, .stDownloadButton > button {
-        background-color: var(--accent) !important;
-        color: #ffffff !important;
+    .stButton > button, .stDownloadButton > button, button[data-testid="stBaseButton-secondary"] {
+        background-color: #ffffff !important;
+        color: #000000 !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
         height: 2.8rem !important;
         width: auto !important;
         min-width: 160px;
         padding: 0 2rem !important;
-        transition: all 0.2s ease;
-        border: none !important;
+        transition: all 0.2s ease-in-out !important;
+        border: 1px solid #ffffff !important;
         margin-top: 1rem !important;
     }
-    .stButton > button:hover, .stDownloadButton > button:hover {
-        opacity: 0.8;
-        background-color: var(--accent) !important;
+    .stButton > button:hover, .stDownloadButton > button:hover, button[data-testid="stBaseButton-secondary"]:hover {
+        background-color: #000000 !important;
         color: #ffffff !important;
+        border: 1px solid #ffffff !important;
+        transform: translateY(-1px);
+    }
+    .stButton > button:active, .stDownloadButton > button:active, button[data-testid="stBaseButton-secondary"]:active {
+        transform: translateY(0);
+        opacity: 0.8;
+    }
+
+    /* Browse files ボタン (Streamlitの特殊なクラス) */
+    div[data-testid="stFileUploader"] button {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: none !important;
+    }
+    div[data-testid="stFileUploader"] button:hover {
+        background-color: #eeeeee !important;
+        color: #000000 !important;
     }
 
     /* スライダー */
