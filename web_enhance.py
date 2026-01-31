@@ -182,6 +182,13 @@ st.markdown("""
     .lang-switch-container svg {
         display: none !important;
     }
+    /* プレースホルダーテキストの色（もしあれば） */
+    .lang-switch-container div[data-baseweb="select"] div {
+        color: #555555 !important;
+    }
+    .lang-switch-container div[data-baseweb="select"]:hover div {
+        color: #ffffff !important;
+    }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
