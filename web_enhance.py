@@ -294,25 +294,25 @@ if uploaded_file:
                         with open(output_path, "rb") as f:
                             audio_bytes = f.read()
                         
-                    # タイムラグを減らすため、ここでBase64エンコードを済ませておく
-                    st.write("プレイヤーを準備中...")
-                    in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
-                    out_b64 = base64.b64encode(audio_bytes).decode()
-                    
-                    st.session_state['processed_data'] = {
-                        'in_b64': in_b64,
-                        'out_b64': out_b64,
-                        'output': audio_bytes,
-                        'name': uploaded_file.name,
-                        'time': proc_duration
-                    }
-                    status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
-                    
-                    # Success表示直後にプレイヤーが出るまでの間に空のプレースホルダーでローディングを維持
-                    with st.spinner("結果を表示しています..."):
-                        time.sleep(0.5) # 描画の安定化のためのわずかな待ち時間
-                        st.rerun()
-
+                        # タイムラグを減らすため、ここでBase64エンコードを済ませておく
+                        st.write("プレイヤーを準備中...")
+                        in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
+                        out_b64 = base64.b64encode(audio_bytes).decode()
+                        
+                        st.session_state['processed_data'] = {
+                            'in_b64': in_b64,
+                            'out_b64': out_b64,
+                            'output': audio_bytes,
+                            'name': uploaded_file.name,
+                            'time': proc_duration
+                        }
+                        status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
+                        
+                        # Success表示直後にプレイヤーが出るまでの間に空のプレースホルダーでローディングを維持
+                        with st.spinner("結果を表示しています..."):
+                            time.sleep(0.5) # 描画の安定化のためのわずかな待ち時間
+                            st.rerun()
+                        
                     except Exception as e:
                         st.error(f"Error: {e}")
                         status.update(label="❌ Error", state="error")
@@ -324,7 +324,7 @@ if uploaded_file:
         st.markdown(f"""
             <div class="success-box">
                 <div class="status">Success</div>
-                <div class="time">{res['time']:.1f}s</div>
+                <div class="time">{{res['time']:.1f}}s</div>
             </div>
         """, unsafe_allow_html=True)
         
@@ -348,12 +348,12 @@ if uploaded_file:
                     <span id="tt" class="time">0:00</span>
                 </div>
                 <div class="tgl-c">
-                    <button id="b1" class="tgl">{T['input_label']}</button>
-                    <button id="b2" class="tgl active">{T['output_label']}</button>
+                    <button id="b1" class="tgl">{{T['input_label']}}</button>
+                    <button id="b2" class="tgl active">{{T['output_label']}}</button>
                 </div>
             </div>
-            <audio id="a1" src="data:audio/wav;base64,{res['in_b64']}" preload="auto"></audio>
-            <audio id="a2" src="data:audio/wav;base64,{res['out_b64']}" preload="auto"></audio>
+            <audio id="a1" src="data:audio/wav;base64,{{res['in_b64']}}" preload="auto"></audio>
+            <audio id="a2" src="data:audio/wav;base64,{{res['out_b64']}}" preload="auto"></audio>
             <script>
             const a1=document.getElementById('a1'), a2=document.getElementById('a2'), p=document.getElementById('p'), s=document.getElementById('s'), ct=document.getElementById('ct'), tt=document.getElementById('tt'), b1=document.getElementById('b1'), b2=document.getElementById('b2');
             let playing=false; a1.muted=true; a2.muted=false;
@@ -372,7 +372,7 @@ if uploaded_file:
 # フッター
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 st.divider()
-st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;padding-left:0;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;padding-left:0;">{{T["powered_by"]}} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
 
 with st.expander("View Documentation & Technical Specs"):
     exp_col1, exp_col2 = st.columns(2)
