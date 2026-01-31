@@ -42,9 +42,9 @@ T = {
     'status_preparing': '音声を準備中...',
     'status_processing': 'AIがノイズを解析・除去しています...',
     'status_saving': '結果を生成中...',
-    'status_done': '完了！ 処理時間: {duration:.1f}秒',
+    'status_done': 'Done! {duration:.1f}s',
     'step3': '3. 処理結果',
-    'success_msg': '🎉 成功: {duration:.1f}秒でクリアな音声が完成しました',
+    'success_msg': 'Success  \n{duration:.1f}s',
     'input_label': '元の音源',
     'output_label': 'AI除去後',
     'btn_download': 'Download',
@@ -192,6 +192,26 @@ st.markdown("""
         margin-bottom: 0.8rem;
     }
     
+    /* 成功メッセージのカスタマイズ */
+    .success-box {
+        padding: 1rem 0;
+        color: #ffffff;
+        font-family: 'Geist', sans-serif;
+        text-align: left;
+    }
+    .success-box .status {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .success-box .time {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 0.25rem;
+    }
+
     /* Streamlit要素の非表示 */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
         display: none !important;
@@ -282,7 +302,12 @@ if uploaded_file:
     st.subheader(T['step3'])
     if 'processed_data' in st.session_state:
         res = st.session_state['processed_data']
-        st.success(T['success_msg'].format(duration=res['time']))
+        st.markdown(f"""
+            <div class="success-box">
+                <div class="status">Success</div>
+                <div class="time">{res['time']:.1f}s</div>
+            </div>
+        """, unsafe_allow_html=True)
         
         in_b64 = base64.b64encode(res['input']).decode()
         out_b64 = base64.b64encode(res['output']).decode()
