@@ -324,7 +324,7 @@ if uploaded_file:
         st.markdown(f"""
             <div class="success-box">
                 <div class="status">Success</div>
-                <div class="time">{{res['time']:.1f}}s</div>
+                <div class="time">{res['time']:.1f}s</div>
             </div>
         """, unsafe_allow_html=True)
         
@@ -348,12 +348,12 @@ if uploaded_file:
                     <span id="tt" class="time">0:00</span>
                 </div>
                 <div class="tgl-c">
-                    <button id="b1" class="tgl">{{T['input_label']}}</button>
-                    <button id="b2" class="tgl active">{{T['output_label']}}</button>
+                    <button id="b1" class="tgl">{T['input_label']}</button>
+                    <button id="b2" class="tgl active">{T['output_label']}</button>
                 </div>
             </div>
-            <audio id="a1" src="data:audio/wav;base64,{{res['in_b64']}}" preload="auto"></audio>
-            <audio id="a2" src="data:audio/wav;base64,{{res['out_b64']}}" preload="auto"></audio>
+            <audio id="a1" src="data:audio/wav;base64,{res['in_b64']}" preload="auto"></audio>
+            <audio id="a2" src="data:audio/wav;base64,{res['out_b64']}" preload="auto"></audio>
             <script>
             const a1=document.getElementById('a1'), a2=document.getElementById('a2'), p=document.getElementById('p'), s=document.getElementById('s'), ct=document.getElementById('ct'), tt=document.getElementById('tt'), b1=document.getElementById('b1'), b2=document.getElementById('b2');
             let playing=false; a1.muted=true; a2.muted=false;
