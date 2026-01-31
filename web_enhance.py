@@ -125,9 +125,8 @@ st.markdown("""
     /* 共通ボタンスタイル (Vercelスタイル) */
     .stButton > button, 
     .stDownloadButton > button, 
-    button[data-testid="stBaseButton-secondary"], 
-    div[data-testid="stFileUploader"] button,
-    div[data-testid="stFileUploader"] button p {
+    button[data-testid="stBaseButton-secondary"]:not([aria-label="Remove file"]),
+    div[data-testid="stFileUploader"] button[data-testid="stBaseButton-secondary"] {
         background-color: #ffffff !important;
         color: #000000 !important;
         border-radius: 6px !important;
@@ -144,13 +143,19 @@ st.markdown("""
         justify-content: center !important;
         font-family: 'Geist', 'Noto Sans JP', sans-serif !important;
     }
-    .stButton > button:hover, .stDownloadButton > button:hover, button[data-testid="stBaseButton-secondary"]:hover, div[data-testid="stFileUploader"] button:hover {
+    .stButton > button:hover, 
+    .stDownloadButton > button:hover, 
+    button[data-testid="stBaseButton-secondary"]:not([aria-label="Remove file"]):hover,
+    div[data-testid="stFileUploader"] button[data-testid="stBaseButton-secondary"]:hover {
         background-color: #000000 !important;
         color: #ffffff !important;
         border: 1px solid #ffffff !important;
         transform: translateY(-1px);
     }
-    .stButton > button:active, .stDownloadButton > button:active, button[data-testid="stBaseButton-secondary"]:active, div[data-testid="stFileUploader"] button:active {
+    .stButton > button:active, 
+    .stDownloadButton > button:active, 
+    button[data-testid="stBaseButton-secondary"]:not([aria-label="Remove file"]):active,
+    div[data-testid="stFileUploader"] button[data-testid="stBaseButton-secondary"]:active {
         transform: translateY(0);
         opacity: 0.8;
     }
