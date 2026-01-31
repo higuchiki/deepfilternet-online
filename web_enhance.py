@@ -190,8 +190,7 @@ st.markdown("""
 
 # メインコンテンツ
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
-st.markdown(f'<p class="sub-title" style="margin-bottom: 0.5rem;">{T["subtitle"]}</p>', unsafe_allow_html=True)
-st.markdown(f'<p style="color: #666; font-size: 1rem; margin-bottom: 3rem; line-height: 1.6;">{T["description"]}</p>', unsafe_allow_html=True)
+st.markdown(f'<p class="sub-title" style="margin-bottom: 3rem;">{T["subtitle"]}</p>', unsafe_allow_html=True)
 
 try:
     model, df_state = get_model()
