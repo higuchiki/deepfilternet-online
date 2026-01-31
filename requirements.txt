@@ -1,5 +1,6 @@
 streamlit
+--find-links https://download.pytorch.org/whl/cpu
 torch
 torchaudio
-numpy
+numpy<2.0.0
 deepfilternet==0.5.6
