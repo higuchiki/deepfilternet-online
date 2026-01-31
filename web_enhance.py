@@ -90,7 +90,7 @@ if uploaded_file:
     with col_conf2:
         atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
         
-        if st.button(T['btn_enhance']):
+    if st.button(T['btn_enhance']):
         with st.status(T['status_processing'], expanded=True) as status:
             with tempfile.TemporaryDirectory() as tmpdirname:
                 input_path = os.path.join(tmpdirname, uploaded_file.name)
