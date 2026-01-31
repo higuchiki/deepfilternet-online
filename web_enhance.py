@@ -23,24 +23,86 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# 言語設定
+if 'lang' not in st.session_state:
+    st.session_state.lang = 'JP'
+
+# テキスト辞書
+TEXTS = {
+    'JP': {
+        'title': 'DeepFilterNet AI 音声ノイズ除去',
+        'subtitle': 'AI技術を駆使した、プロフェッショナル仕様のノイズ除去ツール。',
+        'step1': '1. 音声をアップロード',
+        'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
+        'step2': '2. 設定',
+        'atten_label': 'ノイズ除去の強度制限 (dB)',
+        'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
+        'btn_enhance': '✨ ノイズを除去する',
+        'status_preparing': '音声を準備中...',
+        'status_processing': 'AIがノイズを除去中 (分割処理モード)...',
+        'status_saving': '結果を生成中...',
+        'status_done': '完了！ 処理時間: {duration:.1f}秒',
+        'step3': '3. 処理結果',
+        'success_msg': '🎉 成功: {duration:.1f}秒で処理が完了しました',
+        'input_label': '元の音源',
+        'output_label': 'AI除去後',
+        'btn_download': '📥 除去済み音声をダウンロード',
+        'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
+        'powered_by': 'Powered by',
+        'lang_btn': 'English'
+    },
+    'EN': {
+        'title': 'DeepFilterNet AI Enhancer',
+        'subtitle': 'Professional noise suppression powered by state-of-the-art AI.',
+        'step1': '1. Upload Audio',
+        'uploader_label': 'Select WAV, M4A, MP3, or AAC file',
+        'step2': '2. Configuration',
+        'atten_label': 'Noise Reduction Limit (dB)',
+        'atten_help': 'Lower values mean stronger noise reduction. 0dB is recommended.',
+        'btn_enhance': '✨ Enhance Audio',
+        'status_preparing': 'Preparing audio...',
+        'status_processing': 'AI Processing (Chunked Mode)...',
+        'status_saving': 'Generating results...',
+        'status_done': 'Done! Processed in {duration:.1f}s',
+        'step3': '3. Results',
+        'success_msg': '🎉 Success: Processed in {duration:.1f}s',
+        'input_label': 'Input Source',
+        'output_label': 'AI Enhanced',
+        'btn_download': '📥 Download Enhanced Audio',
+        'info_msg': "Upload and click 'Enhance Audio' to see results.",
+        'powered_by': 'Powered by',
+        'lang_btn': '日本語'
+    }
+}
+
+T = TEXTS[st.session_state.lang]
+
 # Next.js Docs 風のダークモード・ミニマルデザイン
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
     .stApp { background-color: #000000; color: #ededed; font-family: 'Inter', sans-serif; }
-    .main .block-container { max-width: 800px; padding-top: 4rem; }
+    .main .block-container { max-width: 800px; padding-top: 2rem; }
     .main-title { font-weight: 800; font-size: 2.5rem !important; letter-spacing: -0.05em; margin-bottom: 0.5rem; color: #ffffff; text-align: center; }
-    .sub-title { color: #888888; font-size: 1.1rem; margin-bottom: 3rem; text-align: center; }
+    .sub-title { color: #888888; font-size: 1.1rem; margin-bottom: 2rem; text-align: center; }
     .stFileUploader { border: 1px solid #333333 !important; border-radius: 8px !important; background-color: #0a0a0a !important; padding: 1rem !important; }
     .stButton > button { background-color: #ffffff !important; color: #000000 !important; border-radius: 6px !important; font-weight: 600 !important; height: 3rem; width: 100%; transition: all 0.2s ease; border: none; }
     .audio-card { background: #0a0a0a; padding: 1.2rem; border-radius: 8px; border: 1px solid #333333; margin-bottom: 1rem; }
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
-    .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
+    .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
+    .lang-switch { position: absolute; top: 1rem; right: 1rem; }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<h1 class="main-title">DeepFilterNet AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Professional noise suppression powered by AI.</p>', unsafe_allow_html=True)
+# 言語切り替えボタン
+col_l, col_r = st.columns([8, 1])
+with col_r:
+    if st.button(T['lang_btn']):
+        st.session_state.lang = 'EN' if st.session_state.lang == 'JP' else 'JP'
+        st.rerun()
+
+st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
+st.markdown(f'<p class="sub-title">{T["subtitle"]}</p>', unsafe_allow_html=True)
 
 try:
     model, df_state = get_model()
@@ -48,23 +110,23 @@ except Exception as e:
     st.error(f"AI Model Error: {e}")
     st.stop()
 
-st.subheader("1. Upload Audio")
-uploaded_file = st.file_uploader("Select WAV, M4A, MP3, or AAC file", type=["wav", "m4a", "mp3", "aac"])
+st.subheader(T['step1'])
+uploaded_file = st.file_uploader(T['uploader_label'], type=["wav", "m4a", "mp3", "aac"], label_visibility="collapsed")
 
 if uploaded_file:
     st.markdown("---")
-    st.subheader("2. Configuration")
-    atten_lim = st.slider("Noise Reduction Limit (dB)", 0, 100, 0, help="0dB = Maximum reduction")
+    st.subheader(T['step2'])
+    atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
     
-    if st.button("✨ Enhance Audio"):
-        with st.status("AI is working...", expanded=True) as status:
+    if st.button(T['btn_enhance']):
+        with st.status(T['status_processing'], expanded=True) as status:
             with tempfile.TemporaryDirectory() as tmpdirname:
                 input_path = os.path.join(tmpdirname, uploaded_file.name)
                 with open(input_path, "wb") as f:
                     f.write(uploaded_file.getvalue())
                 
                 try:
-                    st.write("Preparing audio...")
+                    st.write(T['status_preparing'])
                     load_path = input_path
                     if not input_path.lower().endswith(".wav"):
                         temp_wav = os.path.join(tmpdirname, "temp.wav")
@@ -73,7 +135,7 @@ if uploaded_file:
                     
                     audio, _ = load_audio(load_path, sr=df_state.sr())
                     
-                    st.write("AI Processing (Chunked Mode)...")
+                    st.write(T['status_processing'])
                     chunk_size = 30 * df_state.sr()
                     total = audio.shape[1]
                     chunks = []
@@ -89,7 +151,7 @@ if uploaded_file:
                     enhanced = torch.cat(chunks, dim=1)
                     proc_duration = time.time() - proc_start
                     
-                    st.write("Generating results...")
+                    st.write(T['status_saving'])
                     output_path = os.path.join(tmpdirname, "enhanced.wav")
                     save_audio(output_path, enhanced, sr=df_state.sr())
                     with open(output_path, "rb") as f:
@@ -101,17 +163,18 @@ if uploaded_file:
                         'name': uploaded_file.name,
                         'time': proc_duration
                     }
-                    status.update(label=f"✅ Done! Processed in {proc_duration:.1f}s", state="complete")
+                    status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
                     st.rerun()
                     
                 except Exception as e:
                     st.error(f"Error: {e}")
-                    status.update(label="❌ Error occurred", state="error")
+                    status.update(label="❌ Error", state="error")
 
     st.markdown("---")
-    st.subheader("3. Results")
+    st.subheader(T['step3'])
     if 'processed_data' in st.session_state:
         res = st.session_state['processed_data']
+        st.success(T['success_msg'].format(duration=res['time']))
         
         in_b64 = base64.b64encode(res['input']).decode()
         out_b64 = base64.b64encode(res['output']).decode()
@@ -135,8 +198,8 @@ if uploaded_file:
                     <span id="tt" style="font-family:monospace; color:#888;">0:00</span>
                 </div>
                 <div class="tgl-c">
-                    <button id="b1" class="tgl">Original</button>
-                    <button id="b2" class="tgl active">AI Enhanced</button>
+                    <button id="b1" class="tgl">{T['input_label']}</button>
+                    <button id="b2" class="tgl active">{T['output_label']}</button>
                 </div>
             </div>
             <audio id="a1" src="data:audio/wav;base64,{in_b64}"></audio>
@@ -154,10 +217,10 @@ if uploaded_file:
             </script>
         """, height=160)
         
-        st.download_button("📥 Download Enhanced Audio", res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
+        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
     else:
-        st.info("Upload and click 'Enhance Audio' to see results.")
+        st.info(T['info_msg'])
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
 st.divider()
-st.markdown('<div style="text-align:center;color:#888;font-size:0.9rem;">Powered by <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align:center;color:#888;font-size:0.9rem;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
