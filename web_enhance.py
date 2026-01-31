@@ -32,7 +32,6 @@ if 'lang' not in st.session_state:
 T = {
     'title': 'DeepFilterNet ブラウザ版',
     'subtitle': 'AIノイズ処理ライブラリDeepFilterNetを使ったノイズ処理Webアプリ',
-    'description': 'AIが、あなたの音声から「雑音」だけを魔法のように消し去ります。',
     'step1': '1. 音源をアップロード',
     'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
     'step2': '2. 除去強度の設定',
