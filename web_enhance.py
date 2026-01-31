@@ -301,9 +301,9 @@ if uploaded_file:
                         st.error(f"Error: {e}")
                         status.update(label="❌ Error", state="error")
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.subheader(T['step3'])
     if 'processed_data' in st.session_state:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader(T['step3'])
         res = st.session_state['processed_data']
         st.markdown(f"""
             <div class="success-box">
@@ -355,8 +355,6 @@ if uploaded_file:
         """, height=160)
         
         st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav")
-    else:
-        st.info(T['info_msg'])
 
 # フッター
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
