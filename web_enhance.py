@@ -31,6 +31,7 @@ if 'lang' not in st.session_state:
 # テキスト辞書
 T = {
     'title': 'DeepFilterNet ブラウザ版',
+    'version': 'v0.1.0-beta',
     'subtitle': 'AIノイズ処理ライブラリDeepFilterNetを使ったノイズ処理Webアプリ',
     'step1': '1. 音源をアップロード',
     'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
@@ -91,6 +92,30 @@ st.markdown("""
         margin-bottom: 0.5rem;
         color: #ffffff;
         text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .version-badge {
+        font-size: 0.65rem;
+        background: #1a1a1a;
+        color: #888;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #333;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .beta-notice {
+        background: rgba(255, 165, 0, 0.1);
+        border: 1px solid rgba(255, 165, 0, 0.2);
+        color: #ffa500;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        margin-bottom: 2rem;
+        display: inline-block;
     }
     .sub-title {
         color: var(--muted);
@@ -287,7 +312,8 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # メインコンテンツ
-st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
+st.markdown(f'<h1 class="main-title">{T["title"]} <span class="version-badge">{T["version"]}</span></h1>', unsafe_allow_html=True)
+st.markdown(f'<div class="beta-notice">⚠️ 現在開発中のベータ版です。予期せぬ動作が発生する可能性があります。</div>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title" style="margin-bottom: 3rem;">{T["subtitle"]}</p>', unsafe_allow_html=True)
 
 try:
