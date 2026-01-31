@@ -109,7 +109,7 @@ st.markdown("""
     }
     /* Streamlitのセレクトボックスを完全に透明化し、テキストのみにする */
     .lang-switch-container [data-testid="stSelectbox"] {
-        width: 90px !important;
+        width: 100px !important;
         background-color: transparent !important;
     }
     .lang-switch-container [data-testid="stSelectbox"] > div > div {
@@ -118,7 +118,11 @@ st.markdown("""
         padding: 0 !important;
     }
     /* セレクトボックスの表示テキスト部分 */
-    .lang-switch-container [data-baseweb="select"] > div:first-child {
+    .lang-switch-container [data-baseweb="select"] {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    .lang-switch-container [data-baseweb="select"] > div {
         background-color: transparent !important;
         border: none !important;
         color: #555555 !important;
@@ -128,7 +132,7 @@ st.markdown("""
         box-shadow: none !important;
     }
     /* ホバー時の色変更 */
-    .lang-switch-container [data-baseweb="select"]:hover > div:first-child {
+    .lang-switch-container [data-baseweb="select"]:hover > div {
         color: #ffffff !important;
     }
     /* 矢印アイコン */
@@ -140,9 +144,11 @@ st.markdown("""
         fill: #ffffff !important;
     }
     /* 選択後の青い枠線（フォーカス）を消す */
-    .lang-switch-container [data-baseweb="select"] {
+    .lang-switch-container [data-baseweb="select"]:focus,
+    .lang-switch-container [data-baseweb="select"]:active {
         border: none !important;
         outline: none !important;
+        box-shadow: none !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
