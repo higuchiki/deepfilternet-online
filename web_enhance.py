@@ -244,6 +244,9 @@ if uploaded_file:
             try:
                 # 1. 読み込みと変換
                 progress_bar.progress(20)
+                # ログ
+                print(f"Processing: {uploaded_file.name}")
+                
                 base, ext = os.path.splitext(input_path)
                 load_path = input_path
                 if ext.lower() in [".m4a", ".mp3", ".mp4", ".aac"]:
