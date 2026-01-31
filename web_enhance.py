@@ -168,6 +168,11 @@ st.markdown("""
         background-color: #333333 !important;
         color: #ffffff !important;
     }
+    /* 追加：特定のクラス名を持つ要素をターゲットにする */
+    .lang-switch-container .stSelectbox div[role="button"] {
+        background-color: transparent !important;
+        border: none !important;
+    }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
