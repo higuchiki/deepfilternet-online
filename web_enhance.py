@@ -74,14 +74,6 @@ TEXTS = {
     }
 }
 
-# クエリパラメータによる言語切り替えのチェック
-query_params = st.query_params
-if "lang" in query_params:
-    new_lang = query_params["lang"].upper()
-    if new_lang in ['JP', 'EN'] and new_lang != st.session_state.lang:
-        st.session_state.lang = new_lang
-        st.rerun()
-
 T = TEXTS[st.session_state.lang]
 
 # CSS
@@ -98,50 +90,52 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えプルダウンを右上に固定 */
-    .custom-lang-switch {
+    /* 言語切り替えセレクトボックスを右上に固定 */
+    .lang-switch-container {
         position: fixed;
         top: 20px;
         right: 20px;
-        z-index: 10000;
+        z-index: 999999;
+        width: 120px;
         display: flex;
         align-items: center;
-        gap: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 4px 12px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.3s ease;
+        gap: 5px;
     }
-    .custom-lang-switch:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-    .lang-label {
-        color: #888;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
+    .lang-switch-container .lang-label {
         font-size: 0.7rem;
+        color: #555;
+        font-weight: 600;
+        text-transform: uppercase;
     }
-    /* Streamlitのselectboxをこのコンテナ内で極限までシンプルにする */
-    .custom-lang-switch div[data-baseweb="select"] {
-        width: 130px !important;
+    /* Streamlitのセレクトボックスを極限までシンプルにする */
+    .lang-switch-container [data-testid="stSelectbox"] {
+        width: 100% !important;
     }
-    .custom-lang-switch div[data-baseweb="select"] > div {
+    .lang-switch-container [data-testid="stSelectbox"] > div > div {
         background-color: transparent !important;
         border: none !important;
-        box-shadow: none !important;
-        color: #ffffff !important;
-        font-size: 0.85rem !important;
-        padding-left: 0 !important;
-        min-height: 0 !important;
+        padding: 0 !important;
     }
-    .custom-lang-switch svg {
-        fill: #888 !important;
+    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+        background-color: transparent !important;
+        border: none !important;
+        color: #555555 !important;
+        font-size: 0.8rem !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        box-shadow: none !important;
+    }
+    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover > div {
+        color: #ffffff !important;
+    }
+    .lang-switch-container svg {
+        fill: #555555 !important;
+    }
+    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover svg {
+        fill: #ffffff !important;
     }
 
-    /* Streamlit標準要素の非表示 */
+    /* Streamlit標準のヘッダー・フッターを非表示にする */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
         visibility: hidden;
         display: none;
@@ -149,27 +143,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 言語切り替え（将来の多言語化を見据えたプルダウン形式）
-st.markdown('<div class="custom-lang-switch">', unsafe_allow_html=True)
-st.markdown('<span class="lang-label">Lang:</span>', unsafe_allow_html=True)
-
-lang_map = {
-    '🇯🇵 JP': 'JP',
-    '🇺🇸 EN': 'EN'
-}
-# 現在の言語からインデックスを計算
-current_lang_name = [k for k, v in lang_map.items() if v == st.session_state.lang][0]
-options = list(lang_map.keys())
-
+# 言語切り替え
+st.markdown('<div class="lang-switch-container"><span class="lang-label">Lang:</span>', unsafe_allow_html=True)
+lang_options = ['🇯🇵 JP', '🇺🇸 EN']
+current_idx = 0 if st.session_state.lang == 'JP' else 1
 selected_lang_name = st.selectbox(
-    "Language",
-    options=options,
-    index=options.index(current_lang_name),
+    "Language Selector",
+    options=lang_options,
+    index=current_idx,
     label_visibility="collapsed",
-    key="lang_selector_new"
+    key="lang_selector_final"
 )
-
-new_lang_code = lang_map[selected_lang_name]
+new_lang_code = 'JP' if 'JP' in selected_lang_name else 'EN'
 if new_lang_code != st.session_state.lang:
     st.session_state.lang = new_lang_code
     st.rerun()
