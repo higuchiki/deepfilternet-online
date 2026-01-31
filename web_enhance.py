@@ -50,7 +50,7 @@ TEXTS = {
         'btn_download': '📥 除去済み音声をダウンロード',
         'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
         'powered_by': 'Powered by',
-        'lang_btn': 'English'
+        'lang_btn': 'Language: English'
     },
     'EN': {
         'title': 'DeepFilterNet AI Enhancer',
@@ -72,7 +72,7 @@ TEXTS = {
         'btn_download': '📥 Download Enhanced Audio',
         'info_msg': "Upload and click 'Enhance Audio' to see results.",
         'powered_by': 'Powered by',
-        'lang_btn': '日本語'
+        'lang_btn': 'Language: 日本語'
     }
 }
 
