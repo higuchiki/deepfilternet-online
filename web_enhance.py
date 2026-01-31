@@ -197,22 +197,28 @@ st.markdown("""
     
     /* 成功メッセージのカスタマイズ */
     .success-box {
-        padding: 1rem 0;
-        color: #ffffff;
-        font-family: 'Geist', sans-serif;
+        padding: 1.25rem;
+        background: #0a0a0a;
+        border-radius: 8px;
+        border: 1px solid #333333;
+        margin: 1rem 0;
         text-align: left;
+        max-width: fit-content;
+        min-width: 120px;
     }
     .success-box .status {
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         color: #ffffff;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
     }
     .success-box .time {
-        font-size: 0.85rem;
-        color: var(--muted);
-        margin-top: 0.25rem;
+        font-family: 'Geist Mono', monospace;
+        font-size: 1.1rem;
+        color: #ffffff;
+        font-weight: 500;
     }
 
     /* Streamlit要素の非表示 */
