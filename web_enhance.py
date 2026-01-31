@@ -90,16 +90,43 @@ st.markdown("""
     .audio-card { background: #0a0a0a; padding: 1.2rem; border-radius: 8px; border: 1px solid #333333; margin-bottom: 1rem; }
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
-    .lang-switch { position: absolute; top: 1rem; right: 1rem; }
+    
+    /* 言語切り替えボタンを右上に配置 */
+    .lang-switch-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: -1rem;
+        margin-bottom: 1rem;
+    }
+    .lang-switch-wrapper .stButton > button {
+        background-color: transparent !important;
+        color: #888888 !important;
+        border: 1px solid #333333 !important;
+        border-radius: 6px !important;
+        height: 2rem !important;
+        width: auto !important;
+        padding: 0 1rem !important;
+        font-size: 0.8rem !important;
+    }
+    .lang-switch-wrapper .stButton > button:hover {
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+
+    /* Streamlit標準のヘッダー・フッターを非表示にする */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    div[data-testid="stDecoration"] {display: none;}
     </style>
 """, unsafe_allow_html=True)
 
 # 言語切り替えボタン
-col_l, col_r = st.columns([8, 1])
-with col_r:
-    if st.button(T['lang_btn']):
-        st.session_state.lang = 'EN' if st.session_state.lang == 'JP' else 'JP'
-        st.rerun()
+st.markdown('<div class="lang-switch-wrapper">', unsafe_allow_html=True)
+if st.button(T['lang_btn']):
+    st.session_state.lang = 'EN' if st.session_state.lang == 'JP' else 'JP'
+    st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title">{T["subtitle"]}</p>', unsafe_allow_html=True)
