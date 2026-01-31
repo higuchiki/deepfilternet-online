@@ -24,51 +24,239 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# テキスト辞書（日本語固定）
-T = {
-    'title': 'DeepFilterNet AI 音声ノイズ除去',
-    'subtitle': 'AI技術を駆使した、プロフェッショナル仕様のノイズ除去ツール。',
-    'step1': '1. 音声をアップロード',
-    'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
-    'step2': '2. 設定',
-    'atten_label': 'ノイズ除去の強度制限 (dB)',
-    'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
-    'btn_enhance': '✨ ノイズを除去する',
-    'status_preparing': '音声を準備中...',
-    'status_processing': 'AIがノイズを除去中 (分割処理モード)...',
-    'status_saving': '結果を生成中...',
-    'status_done': '完了！ 処理時間: {duration:.1f}秒',
-    'step3': '3. 処理結果',
-    'success_msg': '🎉 成功: {duration:.1f}秒で処理が完了しました',
-    'input_label': '元の音源',
-    'output_label': 'AI除去後',
-    'btn_download': '📥 除去済み音声をダウンロード',
-    'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
-    'powered_by': 'Powered by',
+# 言語設定の初期化
+if 'lang' not in st.session_state:
+    st.session_state.lang = 'JP'
+
+# テキスト辞書
+TEXTS = {
+    'JP': {
+        'title': 'DeepFilterNet AI 音声ノイズ除去',
+        'subtitle': 'AI技術を駆使した、プロフェッショナル仕様のノイズ除去ツール。',
+        'step1': '1. 音声をアップロード',
+        'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
+        'step2': '2. 設定',
+        'atten_label': 'ノイズ除去の強度制限 (dB)',
+        'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
+        'btn_enhance': '✨ ノイズを除去する',
+        'status_preparing': '音声を準備中...',
+        'status_processing': 'AIがノイズを除去中 (分割処理モード)...',
+        'status_saving': '結果を生成中...',
+        'status_done': '完了！ 処理時間: {duration:.1f}秒',
+        'step3': '3. 処理結果',
+        'success_msg': '🎉 成功: {duration:.1f}秒で処理が完了しました',
+        'input_label': '元の音源',
+        'output_label': 'AI除去後',
+        'btn_download': '📥 除去済み音声をダウンロード',
+        'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
+        'powered_by': 'Powered by',
+    },
+    'EN': {
+        'title': 'DeepFilterNet AI Enhancer',
+        'subtitle': 'Professional noise suppression powered by state-of-the-art AI.',
+        'step1': '1. Upload Audio',
+        'uploader_label': 'Select WAV, M4A, MP3, or AAC file',
+        'step2': '2. Configuration',
+        'atten_label': 'Noise Reduction Limit (dB)',
+        'atten_help': 'Lower values mean stronger noise reduction. 0dB is recommended.',
+        'btn_enhance': '✨ Enhance Audio',
+        'status_preparing': 'Preparing audio...',
+        'status_processing': 'AI Processing (Chunked Mode)...',
+        'status_saving': 'Generating results...',
+        'status_done': 'Done! Processed in {duration:.1f}s',
+        'step3': '3. Results',
+        'success_msg': '🎉 Success: Processed in {duration:.1f}s',
+        'input_label': 'Input Source',
+        'output_label': 'AI Enhanced',
+        'btn_download': '📥 Download Enhanced Audio',
+        'info_msg': "Upload and click 'Enhance Audio' to see results.",
+        'powered_by': 'Powered by',
+    }
 }
 
-# CSS
+T = TEXTS[st.session_state.lang]
+
+# CSS: Next.js Docs (Vercel) スタイル
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-    .stApp { background-color: #000000; color: #ededed; font-family: 'Inter', sans-serif; }
-    .main .block-container { max-width: 900px; padding-top: 4rem; }
-    .main-title { font-weight: 800; font-size: 2.5rem !important; letter-spacing: -0.05em; margin-bottom: 0.5rem; color: #ffffff; text-align: left; }
-    .sub-title { color: #888888; font-size: 1.1rem; margin-bottom: 3rem; text-align: left; }
-    .stFileUploader { border: 1px solid #333333 !important; border-radius: 8px !important; background-color: #0a0a0a !important; padding: 1rem !important; }
-    .stButton > button { background-color: #ffffff !important; color: #000000 !important; border-radius: 6px !important; font-weight: 600 !important; height: 3rem; width: 100%; transition: all 0.2s ease; border: none; }
-    .audio-card { background: #0a0a0a; padding: 1.2rem; border-radius: 8px; border: 1px solid #333333; margin-bottom: 1rem; }
-    .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
-    .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
+    /* Vercel / Next.js Docs フォントと背景 */
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
     
-    /* Streamlit標準要素の非表示 */
+    :root {
+        --background: #000000;
+        --foreground: #ededed;
+        --muted: #888888;
+        --border: #333333;
+        --accent: #ffffff;
+    }
+
+    .stApp {
+        background-color: var(--background);
+        color: var(--foreground);
+        font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* メインコンテナを左寄せに */
+    .main .block-container {
+        max-width: 1000px;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+        padding-left: 5rem;
+        padding-right: 2rem;
+        padding-top: 4rem;
+    }
+
+    /* タイトルとサブタイトル */
+    .main-title {
+        font-weight: 800;
+        font-size: 3rem !important;
+        letter-spacing: -0.05em;
+        margin-bottom: 0.5rem;
+        color: #ffffff;
+        text-align: left;
+    }
+    .sub-title {
+        color: var(--muted);
+        font-size: 1.2rem;
+        margin-bottom: 3rem;
+        text-align: left;
+        max-width: 600px;
+        line-height: 1.5;
+    }
+
+    /* セクション見出し */
+    h2, h3, .stSubheader {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.02em !important;
+        text-align: left !important;
+    }
+
+    /* アップローダー */
+    .stFileUploader {
+        border: 1px solid var(--border) !important;
+        border-radius: 8px !important;
+        background-color: #0a0a0a !important;
+        padding: 1.5rem !important;
+        max-width: 600px;
+    }
+    .stFileUploader section {
+        background-color: transparent !important;
+    }
+    
+    /* ボタン (Vercelスタイル) */
+    .stButton > button {
+        background-color: var(--accent) !important;
+        color: #000000 !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        height: 2.5rem !important;
+        width: auto !important;
+        min-width: 140px;
+        padding: 0 1.5rem !important;
+        transition: opacity 0.2s ease;
+        border: none !important;
+        margin-left: 0 !important;
+    }
+    .stButton > button:hover {
+        opacity: 0.9;
+    }
+
+    /* スライダー */
+    .stSlider {
+        max-width: 600px;
+    }
+
+    /* オーディオカード */
+    .audio-card {
+        background: #0a0a0a;
+        padding: 1.2rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+        max-width: 450px;
+    }
+    .audio-card b {
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: block;
+        margin-bottom: 0.8rem;
+    }
+    
+    /* ダウンロードボタン (Vercelスタイル) */
+    .stDownloadButton > button {
+        width: auto !important;
+        min-width: 200px !important;
+        padding: 0.6rem 1.5rem !important;
+        background-color: transparent !important;
+        color: #ffffff !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 6px !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        margin-top: 1rem !important;
+        transition: background 0.2s ease;
+    }
+    .stDownloadButton > button:hover {
+        background-color: #111111 !important;
+        border-color: #555555 !important;
+    }
+
+    /* 言語切り替え */
+    .lang-switch-container {
+        position: fixed;
+        top: 20px;
+        right: 40px;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .lang-switch-container .lang-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-weight: 500;
+    }
+    .lang-switch-container [data-testid="stSelectbox"] {
+        width: 100px !important;
+    }
+    .lang-switch-container [data-baseweb="select"] > div {
+        background-color: transparent !important;
+        border: none !important;
+        color: var(--muted) !important;
+        font-size: 0.8rem !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        box-shadow: none !important;
+    }
+    .lang-switch-container [data-baseweb="select"]:hover div {
+        color: #ffffff !important;
+    }
+    .lang-switch-container svg {
+        fill: var(--muted) !important;
+    }
+
+    /* Streamlit要素の非表示 */
     #MainMenu, footer, header, div[data-testid="stDecoration"], div[data-testid="stHeader"] {
-        visibility: hidden;
-        display: none;
+        display: none !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
+# 言語切り替え
+st.markdown('<div class="lang-switch-container"><span class="lang-label">Lang:</span>', unsafe_allow_html=True)
+lang_options = ['🇯🇵 JP', '🇺🇸 EN']
+current_idx = 0 if st.session_state.lang == 'JP' else 1
+selected_lang_name = st.selectbox("Language", options=lang_options, index=current_idx, label_visibility="collapsed", key="lang_sel")
+new_lang_code = 'JP' if 'JP' in selected_lang_name else 'EN'
+if new_lang_code != st.session_state.lang:
+    st.session_state.lang = new_lang_code
+    st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
+
+# メインコンテンツ
 st.markdown(f'<h1 class="main-title">{T["title"]}</h1>', unsafe_allow_html=True)
 st.markdown(f'<p class="sub-title">{T["subtitle"]}</p>', unsafe_allow_html=True)
 
@@ -78,19 +266,19 @@ except Exception as e:
     st.error(f"AI Model Error: {e}")
     st.stop()
 
+# ステップ1
 st.subheader(T['step1'])
-col_up1, col_up2 = st.columns([2, 1])
-with col_up1:
-    uploaded_file = st.file_uploader(T['uploader_label'], type=["wav", "m4a", "mp3", "aac"], label_visibility="collapsed")
+uploaded_file = st.file_uploader(T['uploader_label'], type=["wav", "m4a", "mp3", "aac"], label_visibility="collapsed")
 
 if uploaded_file:
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     st.subheader(T['step2'])
-    col_conf1, col_conf2 = st.columns([2, 1])
-    with col_conf1:
-        atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
-        
-        if st.button(T['btn_enhance']):
+    atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
+    
+    if st.button(T['btn_enhance']):
+        if 'processed_data' in st.session_state:
+            del st.session_state['processed_data']
+            
         with st.status(T['status_processing'], expanded=True) as status:
             with tempfile.TemporaryDirectory() as tmpdirname:
                 input_path = os.path.join(tmpdirname, uploaded_file.name)
@@ -113,12 +301,12 @@ if uploaded_file:
                     chunks = []
                     
                     proc_start = time.time()
-                    progress_bar = st.progress(0)
+                    p_bar = st.progress(0)
                     for i in range(0, total, chunk_size):
                         chunk = audio[:, i:i+chunk_size]
                         enhanced_chunk = enhance(model, df_state, chunk, atten_lim_db=atten_lim)
                         chunks.append(enhanced_chunk)
-                        progress_bar.progress(min(int(i/total*100), 100))
+                        p_bar.progress(min(int(i/total*100), 100))
                     
                     enhanced = torch.cat(chunks, dim=1)
                     proc_duration = time.time() - proc_start
@@ -142,7 +330,7 @@ if uploaded_file:
                     st.error(f"Error: {e}")
                     status.update(label="❌ Error", state="error")
 
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     st.subheader(T['step3'])
     if 'processed_data' in st.session_state:
         res = st.session_state['processed_data']
@@ -153,21 +341,22 @@ if uploaded_file:
         
         st.components.v1.html(f"""
             <style>
-            body {{ background: transparent; margin: 0; font-family: sans-serif; color: white; }}
-            .player {{ background: #0a0a0a; border: 1px solid #333; border-radius: 12px; padding: 1.5rem; }}
+            body {{ background: transparent; margin: 0; font-family: 'Geist', sans-serif; color: white; }}
+            .player {{ background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; max-width: 600px; }}
             .ctrl {{ display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }}
-            .p-btn {{ background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; }}
-            .sk {{ flex-grow: 1; accent-color: white; }}
-            .tgl-c {{ display: flex; background: #1a1a1a; border-radius: 8px; padding: 4px; border: 1px solid #333; width: fit-content; margin: 0 auto; }}
-            .tgl {{ padding: 8px 20px; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: #888; font-weight: 600; }}
+            .p-btn {{ background: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; }}
+            .sk {{ flex-grow: 1; accent-color: white; height: 4px; }}
+            .tgl-c {{ display: flex; background: #111; border-radius: 6px; padding: 3px; border: 1px solid #333; width: fit-content; }}
+            .tgl {{ padding: 6px 14px; border-radius: 4px; cursor: pointer; border: none; background: transparent; color: #888; font-size: 0.8rem; font-weight: 500; }}
             .tgl.active {{ background: #333; color: white; }}
+            .time {{ font-family: monospace; font-size: 0.75rem; color: #888; }}
             </style>
             <div class="player">
                 <div class="ctrl">
                     <button id="p" class="p-btn">▶</button>
-                    <span id="ct" style="font-family:monospace; color:#888;">0:00</span>
+                    <span id="ct" class="time">0:00</span>
                     <input type="range" id="s" class="sk" value="0" step="0.1">
-                    <span id="tt" style="font-family:monospace; color:#888;">0:00</span>
+                    <span id="tt" class="time">0:00</span>
                 </div>
                 <div class="tgl-c">
                     <button id="b1" class="tgl">{T['input_label']}</button>
@@ -193,6 +382,25 @@ if uploaded_file:
     else:
         st.info(T['info_msg'])
 
-st.markdown("<br><br><br>", unsafe_allow_html=True)
+# フッター
+st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 st.divider()
-st.markdown(f'<div style="text-align:center;color:#888;font-size:0.9rem;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align:left;color:#888;font-size:0.85rem;padding-left:0;">{T["powered_by"]} <a href="https://github.com/Rikorose/DeepFilterNet" style="color:#fff;text-decoration:none;font-weight:600;">Hendrik Schröter (Rikorose)</a></div>', unsafe_allow_html=True)
+
+with st.expander("View Documentation & Technical Specs"):
+    exp_col1, exp_col2 = st.columns(2)
+    with exp_col1:
+        st.markdown("### Documentation")
+        st.markdown("""
+        **Deep Filtering**
+        AI-powered frequency separation. Unlike traditional gates, it preserves speech quality while removing background noise.
+
+        **Performance**
+        Optimized Rust engine for near real-time processing on standard CPUs.
+
+        **Privacy**
+        Files are processed in-memory and never stored on disk beyond the session.
+        """)
+    with exp_col2:
+        st.markdown("### Technical Specs")
+        st.code("Sampling Rate: 48kHz\nModel: DeepFilterNet V3\nBackend: PyTorch / Rust")
