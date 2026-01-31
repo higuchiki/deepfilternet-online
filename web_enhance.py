@@ -141,14 +141,17 @@ st.markdown("""
     }
     /* 選択後の青い枠線（フォーカス）を消す */
     .lang-switch-container [data-baseweb="select"]:focus,
-    .lang-switch-container [data-baseweb="select"]:active {
+    .lang-switch-container [data-baseweb="select"]:active,
+    .lang-switch-container [data-baseweb="select"] > div {
         border: none !important;
         outline: none !important;
         box-shadow: none !important;
     }
     /* さらに深い階層の背景も透明化 */
+    .lang-switch-container [data-baseweb="select"] > div,
     .lang-switch-container [data-baseweb="select"] > div > div {
         background-color: transparent !important;
+        border: none !important;
     }
     /* 選択肢のリスト（ポップオーバー）のスタイル */
     div[data-baseweb="popover"] {
