@@ -95,21 +95,32 @@ st.markdown("""
     /* 言語切り替えセレクトボックスを右上に固定 */
     .lang-switch-container {
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: 10px;
+        right: 10px;
         z-index: 999999;
-        width: 120px;
+        width: 100px;
+    }
+    .lang-switch-container [data-testid="stSelectbox"] {
+        min-height: 0px !important;
     }
     .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"] > div {
         background-color: transparent !important;
-        border: 1px solid #333333 !important;
-        color: #888888 !important;
-        border-radius: 6px !important;
-        height: 2rem !important;
-        font-size: 0.8rem !important;
+        border: none !important;
+        color: #555555 !important;
+        font-size: 0.75rem !important;
+        height: 1.5rem !important;
+        padding: 0 !important;
     }
     .lang-switch-container [data-testid="stSelectbox"] svg {
-        fill: #888888 !important;
+        fill: #555555 !important;
+        width: 12px !important;
+        height: 12px !important;
+    }
+    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover > div {
+        color: #ffffff !important;
+    }
+    .lang-switch-container [data-testid="stSelectbox"] [data-baseweb="select"]:hover svg {
+        fill: #ffffff !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
