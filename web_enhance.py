@@ -18,63 +18,38 @@ def get_model():
 
 # ページ設定
 st.set_page_config(
-    page_title="DeepFilterNet AI",
+    page_title="ClearVoice AI",
     page_icon="🎙️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# 言語設定の初期化
+# 言語設定（日本語固定）
 if 'lang' not in st.session_state:
     st.session_state.lang = 'JP'
 
 # テキスト辞書
-TEXTS = {
-    'JP': {
-        'title': 'DeepFilterNet AI 音声ノイズ除去',
-        'subtitle': 'AI技術を駆使した、プロフェッショナル仕様のノイズ除去ツール。',
-        'step1': '1. 音声をアップロード',
-        'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
-        'step2': '2. 設定',
-        'atten_label': 'ノイズ除去の強度制限 (dB)',
-        'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
-        'btn_enhance': '✨ ノイズを除去する',
-        'status_preparing': '音声を準備中...',
-        'status_processing': 'AIがノイズを除去中 (分割処理モード)...',
-        'status_saving': '結果を生成中...',
-        'status_done': '完了！ 処理時間: {duration:.1f}秒',
-        'step3': '3. 処理結果',
-        'success_msg': '🎉 成功: {duration:.1f}秒で処理が完了しました',
-        'input_label': '元の音源',
-        'output_label': 'AI除去後',
-        'btn_download': '📥 除去済み音声をダウンロード',
-        'info_msg': 'ファイルをアップロードして「ノイズを除去する」をクリックしてください。',
-        'powered_by': 'Powered by',
-    },
-    'EN': {
-        'title': 'DeepFilterNet AI Enhancer',
-        'subtitle': 'Professional noise suppression powered by state-of-the-art AI.',
-        'step1': '1. Upload Audio',
-        'uploader_label': 'Select WAV, M4A, MP3, or AAC file',
-        'step2': '2. Configuration',
-        'atten_label': 'Noise Reduction Limit (dB)',
-        'atten_help': 'Lower values mean stronger noise reduction. 0dB is recommended.',
-        'btn_enhance': '✨ Enhance Audio',
-        'status_preparing': 'Preparing audio...',
-        'status_processing': 'AI Processing (Chunked Mode)...',
-        'status_saving': 'Generating results...',
-        'status_done': 'Done! Processed in {duration:.1f}s',
-        'step3': '3. Results',
-        'success_msg': '🎉 Success: Processed in {duration:.1f}s',
-        'input_label': 'Input Source',
-        'output_label': 'AI Enhanced',
-        'btn_download': '📥 Download Enhanced Audio',
-        'info_msg': "Upload and click 'Enhance Audio' to see results.",
-        'powered_by': 'Powered by',
-    }
+T = {
+    'title': 'ClearVoice AI',
+    'subtitle': 'AIが、あなたの音声から「雑音」だけを魔法のように消し去ります。',
+    'step1': '1. 音源をアップロード',
+    'uploader_label': 'WAV, M4A, MP3, AAC ファイルを選択してください',
+    'step2': '2. 除去強度の設定',
+    'atten_label': 'ノイズ除去の制限 (dB)',
+    'atten_help': '0dBに近いほど強力にノイズを消します。声が不自然な場合のみ値を大きくしてください。',
+    'btn_enhance': '✨ クリアな音声を生成する',
+    'status_preparing': '音声を準備中...',
+    'status_processing': 'AIがノイズを解析・除去しています...',
+    'status_saving': '結果を生成中...',
+    'status_done': '完了！ 処理時間: {duration:.1f}秒',
+    'step3': '3. 処理結果',
+    'success_msg': '🎉 成功: {duration:.1f}秒でクリアな音声が完成しました',
+    'input_label': '元の音源',
+    'output_label': 'AI除去後',
+    'btn_download': '📥 クリアな音声をダウンロード',
+    'info_msg': 'ファイルをアップロードして「クリアな音声を生成する」をクリックしてください。',
+    'powered_by': 'Powered by',
 }
-
-T = TEXTS[st.session_state.lang]
 
 # CSS: Next.js Docs (Vercel) スタイル
 st.markdown("""
@@ -110,7 +85,7 @@ st.markdown("""
     .main-title {
         font-family: 'Geist', 'Noto Sans JP', sans-serif;
         font-weight: 700;
-        font-size: 2.25rem !important; /* サイズを抑えて上品に */
+        font-size: 2.25rem !important;
         letter-spacing: -0.04em;
         margin-bottom: 0.75rem;
         color: #ffffff;
@@ -118,7 +93,7 @@ st.markdown("""
     }
     .sub-title {
         color: var(--muted);
-        font-size: 1rem; /* 少し小さくしてモダンに */
+        font-size: 1rem;
         margin-bottom: 3rem;
         text-align: left;
         max-width: 600px;
@@ -225,67 +200,71 @@ except Exception as e:
 
 # ステップ1
 st.subheader(T['step1'])
-uploaded_file = st.file_uploader(T['uploader_label'], type=["wav", "m4a", "mp3", "aac"], label_visibility="collapsed")
+col_up1, col_up2 = st.columns([2, 1])
+with col_up1:
+    uploaded_file = st.file_uploader(T['uploader_label'], type=["wav", "m4a", "mp3", "aac"], label_visibility="collapsed")
 
 if uploaded_file:
     st.markdown("<br>", unsafe_allow_html=True)
     st.subheader(T['step2'])
-    atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
-    
-    if st.button(T['btn_enhance']):
-        if 'processed_data' in st.session_state:
-            del st.session_state['processed_data']
-            
-        with st.status(T['status_processing'], expanded=True) as status:
-            with tempfile.TemporaryDirectory() as tmpdirname:
-                input_path = os.path.join(tmpdirname, uploaded_file.name)
-                with open(input_path, "wb") as f:
-                    f.write(uploaded_file.getvalue())
+    col_conf1, col_conf2 = st.columns([2, 1])
+    with col_conf1:
+        atten_lim = st.slider(T['atten_label'], 0, 100, 0, help=T['atten_help'])
+        
+        if st.button(T['btn_enhance']):
+            if 'processed_data' in st.session_state:
+                del st.session_state['processed_data']
                 
-                try:
-                    st.write(T['status_preparing'])
-                    load_path = input_path
-                    if not input_path.lower().endswith(".wav"):
-                        temp_wav = os.path.join(tmpdirname, "temp.wav")
-                        subprocess.run(["ffmpeg", "-y", "-i", input_path, temp_wav], check=True, capture_output=True)
-                        load_path = temp_wav
+            with st.status(T['status_processing'], expanded=True) as status:
+                with tempfile.TemporaryDirectory() as tmpdirname:
+                    input_path = os.path.join(tmpdirname, uploaded_file.name)
+                    with open(input_path, "wb") as f:
+                        f.write(uploaded_file.getvalue())
                     
-                    audio, _ = load_audio(load_path, sr=df_state.sr())
-                    
-                    st.write(T['status_processing'])
-                    chunk_size = 30 * df_state.sr()
-                    total = audio.shape[1]
-                    chunks = []
-                    
-                    proc_start = time.time()
-                    p_bar = st.progress(0)
-                    for i in range(0, total, chunk_size):
-                        chunk = audio[:, i:i+chunk_size]
-                        enhanced_chunk = enhance(model, df_state, chunk, atten_lim_db=atten_lim)
-                        chunks.append(enhanced_chunk)
-                        p_bar.progress(min(int(i/total*100), 100))
-                    
-                    enhanced = torch.cat(chunks, dim=1)
-                    proc_duration = time.time() - proc_start
-                    
-                    st.write(T['status_saving'])
-                    output_path = os.path.join(tmpdirname, "enhanced.wav")
-                    save_audio(output_path, enhanced, sr=df_state.sr())
-                    with open(output_path, "rb") as f:
-                        audio_bytes = f.read()
-                    
-                    st.session_state['processed_data'] = {
-                        'input': uploaded_file.getvalue(),
-                        'output': audio_bytes,
-                        'name': uploaded_file.name,
-                        'time': proc_duration
-                    }
-                    status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
-                    st.rerun()
-                    
-                except Exception as e:
-                    st.error(f"Error: {e}")
-                    status.update(label="❌ Error", state="error")
+                    try:
+                        st.write(T['status_preparing'])
+                        load_path = input_path
+                        if not input_path.lower().endswith(".wav"):
+                            temp_wav = os.path.join(tmpdirname, "temp.wav")
+                            subprocess.run(["ffmpeg", "-y", "-i", input_path, temp_wav], check=True, capture_output=True)
+                            load_path = temp_wav
+                        
+                        audio, _ = load_audio(load_path, sr=df_state.sr())
+                        
+                        st.write(T['status_processing'])
+                        chunk_size = 30 * df_state.sr()
+                        total = audio.shape[1]
+                        chunks = []
+                        
+                        proc_start = time.time()
+                        p_bar = st.progress(0)
+                        for i in range(0, total, chunk_size):
+                            chunk = audio[:, i:i+chunk_size]
+                            enhanced_chunk = enhance(model, df_state, chunk, atten_lim_db=atten_lim)
+                            chunks.append(enhanced_chunk)
+                            p_bar.progress(min(int(i/total*100), 100))
+                        
+                        enhanced = torch.cat(chunks, dim=1)
+                        proc_duration = time.time() - proc_start
+                        
+                        st.write(T['status_saving'])
+                        output_path = os.path.join(tmpdirname, "enhanced.wav")
+                        save_audio(output_path, enhanced, sr=df_state.sr())
+                        with open(output_path, "rb") as f:
+                            audio_bytes = f.read()
+                        
+                        st.session_state['processed_data'] = {
+                            'input': uploaded_file.getvalue(),
+                            'output': audio_bytes,
+                            'name': uploaded_file.name,
+                            'time': proc_duration
+                        }
+                        status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
+                        st.rerun()
+                        
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+                        status.update(label="❌ Error", state="error")
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.subheader(T['step3'])
