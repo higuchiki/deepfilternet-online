@@ -6,6 +6,7 @@ import numpy as np
 import time
 import tempfile
 import subprocess
+import threading
 import base64
 from df.enhance import enhance, init_df, load_audio, save_audio
 
@@ -91,34 +92,29 @@ st.markdown("""
     .audio-card b { color: #4A90E2; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.8rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
     .stDownloadButton > button { width: auto !important; min-width: 300px !important; padding: 0.8rem 2rem !important; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important; color: #000000 !important; border-radius: 12px !important; font-weight: 700 !important; margin: 2.5rem auto !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; border: none; }
     
-    /* 言語切り替えテキストを右上に配置 */
-    .lang-switch-wrapper {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: -1rem;
-        margin-bottom: 1rem;
+    /* 言語切り替えテキストを右上に固定 */
+    .lang-switch-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 999999;
     }
-    .lang-switch-wrapper .stButton > button {
-        background-color: transparent !important;
+    .lang-switch-container .stButton > button {
+        background: transparent !important;
         color: #888888 !important;
         border: none !important;
-        border-radius: 0 !important;
-        height: auto !important;
-        width: auto !important;
-        padding: 0 !important;
+        box-shadow: none !important;
         font-size: 0.85rem !important;
         font-weight: 400 !important;
+        padding: 0 !important;
+        width: auto !important;
+        height: auto !important;
         text-decoration: none !important;
-        box-shadow: none !important;
-        transition: color 0.2s ease;
     }
-    .lang-switch-wrapper .stButton > button:hover {
+    .lang-switch-container .stButton > button:hover {
         color: #ffffff !important;
-        background-color: transparent !important;
         text-decoration: underline !important;
-    }
-    .lang-switch-wrapper .stButton > button:active {
-        background-color: transparent !important;
+        background: transparent !important;
     }
 
     /* Streamlit標準のヘッダー・フッターを非表示にする */
@@ -129,9 +125,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 言語切り替えボタン
-st.markdown('<div class="lang-switch-wrapper">', unsafe_allow_html=True)
-if st.button(T['lang_btn']):
+# 言語切り替え（コンテナで包む）
+st.markdown('<div class="lang-switch-container">', unsafe_allow_html=True)
+if st.button(T['lang_btn'], key="lang_switcher"):
     st.session_state.lang = 'EN' if st.session_state.lang == 'JP' else 'JP'
     st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
