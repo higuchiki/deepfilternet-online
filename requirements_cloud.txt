@@ -1,0 +1,5 @@
+streamlit
+torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+numpy<2.0.0
+deepfilternet==0.5.6
