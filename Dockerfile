@@ -1,11 +1,12 @@
 # Python 3.11のスリム版を使用
 FROM python:3.11-slim
 
-# システムの依存パッケージ（ffmpegなど）をインストール
+# システムの依存パッケージ（ffmpeg, gitなど）をインストール
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     curl \
     build-essential \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # 作業ディレクトリの設定
