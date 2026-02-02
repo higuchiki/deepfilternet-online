@@ -342,16 +342,23 @@ if uploaded_file:
                     with open(input_path, "wb") as f:
                         f.write(uploaded_file.getvalue())
                     
-                    try:
-                        st.write(T['status_preparing'])
-                        load_path = input_path
-                        if not input_path.lower().endswith(".wav"):
-                            temp_wav = os.path.join(tmpdirname, "temp.wav")
-                            subprocess.run(["ffmpeg", "-y", "-i", input_path, temp_wav], check=True, capture_output=True)
-                            load_path = temp_wav
-                        
-                        audio, _ = load_audio(load_path, sr=df_state.sr())
-                        
+                try:
+                    st.write(T['status_preparing'])
+                    load_path = input_path
+                    if not input_path.lower().endswith(".wav"):
+                        temp_wav = os.path.join(tmpdirname, "temp.wav")
+                        # ffmpegの出力を詳細に取得
+                        result = subprocess.run(["ffmpeg", "-y", "-i", input_path, temp_wav], capture_output=True, text=True)
+                        if result.returncode != 0:
+                            st.error(f"FFmpeg Error: {result.stderr}")
+                        load_path = temp_wav
+                    
+                    # torchaudioのバックエンド情報をデバッグ出力
+                    import torchaudio
+                    st.info(f"Debug - torchaudio backends: {torchaudio.list_audio_backends()}")
+                    
+                    audio, _ = load_audio(load_path, sr=df_state.sr())
+
                         st.write(T['status_processing'])
                         chunk_size = 30 * df_state.sr()
                         total = audio.shape[1]
