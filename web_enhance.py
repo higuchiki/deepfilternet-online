@@ -338,71 +338,71 @@ if uploaded_file:
                 
             with st.status(T['status_processing'], expanded=True) as status:
                 with tempfile.TemporaryDirectory() as tmpdirname:
-                    input_path = os.path.join(tmpdirname, uploaded_file.name)
-                    with open(input_path, "wb") as f:
-                        f.write(uploaded_file.getvalue())
-                    
-                try:
-                    st.write(T['status_preparing'])
-                    load_path = input_path
-                    if not input_path.lower().endswith(".wav"):
-                        temp_wav = os.path.join(tmpdirname, "temp.wav")
-                        # ffmpegの出力を詳細に取得
-                        result = subprocess.run(["ffmpeg", "-y", "-i", input_path, temp_wav], capture_output=True, text=True)
-                        if result.returncode != 0:
-                            st.error(f"FFmpeg Error: {result.stderr}")
-                        load_path = temp_wav
-                    
-                    # torchaudioのバックエンド情報をデバッグ出力
-                    import torchaudio
-                    st.info(f"Debug - torchaudio backends: {torchaudio.list_audio_backends()}")
-                    
-                    audio, _ = load_audio(load_path, sr=df_state.sr())
-                    
-                    st.write(T['status_processing'])
-                    chunk_size = 30 * df_state.sr()
-                    total = audio.shape[1]
-                    chunks = []
-                    
-                    proc_start = time.time()
-                    p_bar = st.progress(0)
-                    for i in range(0, total, chunk_size):
-                        chunk = audio[:, i:i+chunk_size]
-                        enhanced_chunk = enhance(model, df_state, chunk, atten_lim_db=atten_lim)
-                        chunks.append(enhanced_chunk)
-                        p_bar.progress(min(int(i/total*100), 100))
-                    
-                    enhanced = torch.cat(chunks, dim=1)
-                    proc_duration = time.time() - proc_start
-                    
-                    st.write(T['status_saving'])
-                    output_path = os.path.join(tmpdirname, "enhanced.wav")
-                    save_audio(output_path, enhanced, sr=df_state.sr())
-                    with open(output_path, "rb") as f:
-                        audio_bytes = f.read()
-                    
-                    # タイムラグを減らすため、ここでBase64エンコードを済ませておく
-                    st.write("プレイヤーを準備中...")
-                    in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
-                    out_b64 = base64.b64encode(audio_bytes).decode()
-                    
-                    st.session_state['processed_data'] = {
-                        'in_b64': in_b64,
-                        'out_b64': out_b64,
-                        'output': audio_bytes,
-                        'name': uploaded_file.name,
-                        'time': proc_duration
-                    }
-                    status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
-                    
-                    # Success表示直後にプレイヤーが出るまでの間に空のプレースホルダーでローディングを維持
-                    with st.spinner("結果を表示しています..."):
-                        time.sleep(0.5) # 描画の安定化のためのわずかな待ち時間
-                        st.rerun()
-                    
-                except Exception as e:
-                    st.error(f"Error: {e}")
-                    status.update(label="❌ Error", state="error")
+                    try:
+                        input_path = os.path.join(tmpdirname, uploaded_file.name)
+                        with open(input_path, "wb") as f:
+                            f.write(uploaded_file.getvalue())
+                        
+                        st.write(T['status_preparing'])
+                        load_path = input_path
+                        if not input_path.lower().endswith(".wav"):
+                            temp_wav = os.path.join(tmpdirname, "temp.wav")
+                            # ffmpegの出力を詳細に取得
+                            result = subprocess.run(["ffmpeg", "-y", "-i", input_path, temp_wav], capture_output=True, text=True)
+                            if result.returncode != 0:
+                                st.error(f"FFmpeg Error: {result.stderr}")
+                            load_path = temp_wav
+                        
+                        # torchaudioのバックエンド情報をデバッグ出力
+                        import torchaudio
+                        st.info(f"Debug - torchaudio backends: {torchaudio.list_audio_backends()}")
+                        
+                        audio, _ = load_audio(load_path, sr=df_state.sr())
+                        
+                        st.write(T['status_processing'])
+                        chunk_size = 30 * df_state.sr()
+                        total = audio.shape[1]
+                        chunks = []
+                        
+                        proc_start = time.time()
+                        p_bar = st.progress(0)
+                        for i in range(0, total, chunk_size):
+                            chunk = audio[:, i:i+chunk_size]
+                            enhanced_chunk = enhance(model, df_state, chunk, atten_lim_db=atten_lim)
+                            chunks.append(enhanced_chunk)
+                            p_bar.progress(min(int(i/total*100), 100))
+                        
+                        enhanced = torch.cat(chunks, dim=1)
+                        proc_duration = time.time() - proc_start
+                        
+                        st.write(T['status_saving'])
+                        output_path = os.path.join(tmpdirname, "enhanced.wav")
+                        save_audio(output_path, enhanced, sr=df_state.sr())
+                        with open(output_path, "rb") as f:
+                            audio_bytes = f.read()
+                        
+                        # タイムラグを減らすため、ここでBase64エンコードを済ませておく
+                        st.write("プレイヤーを準備中...")
+                        in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
+                        out_b64 = base64.b64encode(audio_bytes).decode()
+                        
+                        st.session_state['processed_data'] = {
+                            'in_b64': in_b64,
+                            'out_b64': out_b64,
+                            'output': audio_bytes,
+                            'name': uploaded_file.name,
+                            'time': proc_duration
+                        }
+                        status.update(label=T['status_done'].format(duration=proc_duration), state="complete")
+                        
+                        # Success表示直後にプレイヤーが出るまでの間に空のプレースホルダーでローディングを維持
+                        with st.spinner("結果を表示しています..."):
+                            time.sleep(0.5) # 描画の安定化のためのわずかな待ち時間
+                            st.rerun()
+                        
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+                        status.update(label="❌ Error", state="error")
 
     if 'processed_data' in st.session_state:
         res = st.session_state['processed_data']
