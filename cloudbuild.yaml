@@ -1,25 +1,23 @@
 steps:
-  # 1. Kaniko を使用して Docker イメージをビルドし、Container Registry にプッシュします。
-  # Kaniko キャッシュが有効になっているため、後続のビルドが高速化されます。
-  - name: 'gcr.io/kaniko-project/executor:latest'
-    args:
-      - --dockerfile=./Dockerfile
-      - --context=dir://.
-      - --destination=gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA
-      - --cache=true
-      - --cache-ttl=24h
+  # 1. Docker を使用してイメージをビルドします (Kaniko よりも大規模イメージの Snapshot に強いため)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA', '.']
 
-  # 2. 新しいイメージを Google Cloud Run にデプロイします。
+  # 2. イメージを Container Registry にプッシュします
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA']
+
+  # 3. Cloud Run にデプロイします
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
-      - 'deep-filter-net' # Cloud Run のサービス名を指定
+      - 'deep-filter-net'
       - '--image'
       - 'gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA'
       - '--region'
-      - 'asia-northeast1' # デプロイするリージョンを指定
+      - 'asia-northeast1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
