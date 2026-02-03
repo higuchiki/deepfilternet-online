@@ -24,6 +24,7 @@ FROM python:3.11-slim
 # 実行に必要なシステムパッケージのみをインストール
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
+    git \
     libsox-dev \
     sox \
     libsox-fmt-all \
