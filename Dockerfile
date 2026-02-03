@@ -1,8 +1,8 @@
-# 1. 依存関係のインストール層 (キャッシュ用)
+# 1. 依存関係のインストール層
 FROM python:3.11-slim AS builder
 
 # システムの依存パッケージをインストール
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     git \
     libsox-dev \
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# requirements.txt のみを先にコピーしてインストール (ここがキャッシュされる)
+# requirements_cloud.txt をコピーしてインストール
 COPY requirements_cloud.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -22,9 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 FROM python:3.11-slim
 
 # 実行に必要なシステムパッケージのみをインストール
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
-    git \
     libsox-dev \
     sox \
     libsox-fmt-all \
@@ -32,14 +31,15 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# builder層でインストールしたライブラリをコピー
+# builder層からインストール済みパッケージをコピー
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# アプリケーションコードをコピー (コードの修正時はここから下が実行されるため高速)
+# プログラムをコピー
 COPY . .
 
 ENV PORT=8080
+ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
 
-CMD streamlit run web_enhance.py --server.port=${PORT} --server.address=0.0.0.0
+CMD ["streamlit", "run", "web_enhance.py", "--server.port=8080", "--server.address=0.0.0.0"]

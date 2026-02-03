@@ -1,0 +1,10 @@
+.git
+.gitignore
+.DS_Store
+.devcontainer
+data/
+*.md
+Dockerfile
+cloudbuild.yaml
+.agent/
+.gemini/
