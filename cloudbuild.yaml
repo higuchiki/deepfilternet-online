@@ -11,14 +11,12 @@ steps:
       - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
       - '.'
 
-  # 2. イメージを Artifact Registry にプッシュします (並列化)
+  # 2. イメージを Artifact Registry にプッシュします
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA']
-    waitFor: ['-']  # 前のステップの完了を待たずに開始
   
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest']
-    waitFor: ['-']  # 前のステップの完了を待たずに開始
 
   # 3. Cloud Run にデプロイします
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
