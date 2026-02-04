@@ -1,11 +1,24 @@
 steps:
-  # 1. Docker を使用してイメージをビルドします (Kaniko よりも大規模イメージの Snapshot に強いため)
+  # 1. Docker を使用してイメージをビルドします (キャッシュを有効化)
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA', '.']
+    args: 
+      - 'build'
+      - '--cache-from'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
+      - '-t'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA'
+      - '-t'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
+      - '.'
 
-  # 2. イメージを Container Registry にプッシュします
+  # 2. イメージを Artifact Registry にプッシュします (並列化)
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA']
+    args: ['push', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA']
+    waitFor: ['-']  # 前のステップの完了を待たずに開始
+  
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest']
+    waitFor: ['-']  # 前のステップの完了を待たずに開始
 
   # 3. Cloud Run にデプロイします
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -15,7 +28,7 @@ steps:
       - 'deploy'
       - 'deep-filter-net'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA'
       - '--region'
       - 'asia-northeast1'
       - '--platform'
@@ -28,7 +41,8 @@ steps:
 
 # ビルドしたイメージを保存
 images:
-  - 'gcr.io/$PROJECT_ID/deep-filter-net:$COMMIT_SHA'
+  - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA'
+  - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
 
 # タイムアウトを30分に設定
 timeout: 1800s
