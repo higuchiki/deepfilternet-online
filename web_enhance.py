@@ -353,10 +353,6 @@ if uploaded_file:
                                 st.error(f"FFmpeg Error: {result.stderr}")
                             load_path = temp_wav
                         
-                        # torchaudioのバックエンド情報をデバッグ出力
-                        import torchaudio
-                        st.info(f"Debug - torchaudio backends: {torchaudio.list_audio_backends()}")
-                        
                         audio, _ = load_audio(load_path, sr=df_state.sr())
                         
                         st.write(T['status_processing'])
@@ -381,14 +377,8 @@ if uploaded_file:
                         with open(output_path, "rb") as f:
                             audio_bytes = f.read()
                         
-                        # タイムラグを減らすため、ここでBase64エンコードを済ませておく
-                        st.write("プレイヤーを準備中...")
-                        in_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
-                        out_b64 = base64.b64encode(audio_bytes).decode()
-                        
                         st.session_state['processed_data'] = {
-                            'in_b64': in_b64,
-                            'out_b64': out_b64,
+                            'input': uploaded_file.getvalue(),
                             'output': audio_bytes,
                             'name': uploaded_file.name,
                             'time': proc_duration
@@ -407,94 +397,23 @@ if uploaded_file:
     if 'processed_data' in st.session_state:
         res = st.session_state['processed_data']
         
-        # 見出し、成功メッセージ、プレイヤーを1つのHTMLユニットに統合して同時表示
-        st.components.v1.html(f"""
-            <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Geist:wght@400;600&family=Noto+Sans+JP:wght@400;600&display=swap');
-            body {{ background: transparent; margin: 0; font-family: 'Geist', 'Noto Sans JP', sans-serif; color: white; }}
-            
-            /* セクション見出しのスタイル */
-            .section-header {{
-                color: #ffffff;
-                font-weight: 600;
-                font-size: 1rem;
-                letter-spacing: 0.02em;
-                text-align: left;
-                margin-top: 1rem;
-                margin-bottom: 1rem;
-            }}
-
-            /* 成功メッセージのスタイル */
-            .success-box {{
-                padding: 1.25rem;
-                background: #0a0a0a;
-                border-radius: 8px;
-                border: 1px solid #333333;
-                margin-bottom: 1.5rem;
-                text-align: left;
-                max-width: fit-content;
-                min-width: 120px;
-            }}
-            .success-box .status {{
-                font-weight: 600;
-                font-size: 0.85rem;
-                color: #ffffff;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                margin-bottom: 0.25rem;
-            }}
-            .success-box .time {{
-                font-family: monospace;
-                font-size: 1.1rem;
-                color: #ffffff;
-                font-weight: 500;
-            }}
-
-            /* プレイヤーのスタイル */
-            .player {{ background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; max-width: 600px; }}
-            .ctrl {{ display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }}
-            .p-btn {{ background: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; }}
-            .sk {{ flex-grow: 1; accent-color: white; height: 4px; }}
-            .tgl-c {{ display: flex; background: #111; border-radius: 6px; padding: 3px; border: 1px solid #333; width: fit-content; }}
-            .tgl {{ padding: 6px 14px; border-radius: 4px; cursor: pointer; border: none; background: transparent; color: #888; font-size: 0.8rem; font-weight: 500; }}
-            .tgl.active {{ background: #333; color: white; }}
-            .time-disp {{ font-family: monospace; font-size: 0.75rem; color: #888; }}
-            </style>
-
-            <div class="section-header">{T['step3']}</div>
-
+        st.subheader(T['step3'])
+        
+        # 成功メッセージ
+        st.markdown(f"""
             <div class="success-box">
                 <div class="status">Success</div>
                 <div class="time">{res['time']:.1f}s</div>
             </div>
-
-            <div class="player">
-                <div class="ctrl">
-                    <button id="p" class="p-btn">▶</button>
-                    <span id="ct" class="time-disp">0:00</span>
-                    <input type="range" id="s" class="sk" value="0" step="0.1">
-                    <span id="tt" class="time-disp">0:00</span>
-                </div>
-                <div class="tgl-c">
-                    <button id="b1" class="tgl">{T['input_label']}</button>
-                    <button id="b2" class="tgl active">{T['output_label']}</button>
-                </div>
-            </div>
-
-            <audio id="a1" src="data:audio/wav;base64,{res['in_b64']}" preload="auto"></audio>
-            <audio id="a2" src="data:audio/wav;base64,{res['out_b64']}" preload="auto"></audio>
-            <script>
-            const a1=document.getElementById('a1'), a2=document.getElementById('a2'), p=document.getElementById('p'), s=document.getElementById('s'), ct=document.getElementById('ct'), tt=document.getElementById('tt'), b1=document.getElementById('b1'), b2=document.getElementById('b2');
-            let playing=false; a1.muted=true; a2.muted=false;
-            const fmt=t=>{{const m=Math.floor(t/60),s=Math.floor(t%60); return m+":"+(s<10?"0"+s:s)}};
-            p.onclick=async()=>{{ if(playing){{a1.pause();a2.pause();p.innerText='▶'}}else{{await Promise.all([a1.play(),a2.play()]);p.innerText='||'}} playing=!playing }};
-            b1.onclick=()=>{{ b1.classList.add('active'); b2.classList.remove('active'); a1.muted=false; a2.muted=true; a1.currentTime=a2.currentTime; }};
-            b2.onclick=()=>{{ b2.classList.add('active'); b1.classList.remove('active'); a2.muted=false; a1.muted=true; a2.currentTime=a1.currentTime; }};
-            a2.onloadedmetadata=()=>{{ tt.innerText=fmt(a2.duration); s.max=a2.duration; }};
-            a2.ontimeupdate=()=>{{ s.value=a2.currentTime; ct.innerText=fmt(a2.currentTime); }};
-            s.oninput=()=>{{ a1.currentTime=a2.currentTime=s.value; }};
-            </script>
-        """, height=340)
+        """, unsafe_allow_html=True)
+        
+        col_res1, col_res2 = st.columns(2)
+        with col_res1:
+            st.markdown(f"**{T['input_label']}**")
+            st.audio(res['input'], format="audio/wav")
+        with col_res2:
+            st.markdown(f"**{T['output_label']}**")
+            st.audio(res['output'], format="audio/wav")
         
         st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav", key="dl_btn_final")
 
