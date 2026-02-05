@@ -14,7 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# requirements_cloud.txt をコピーしてインストール
+# PyTorch を CPU 専用で先にインストール（CUDA 依存を入れない）
+RUN pip install --no-cache-dir torch==2.2.2 torchaudio==2.2.2 \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# その他は requirements_cloud.txt（torch/torchaudio は上で済み）
 COPY requirements_cloud.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
