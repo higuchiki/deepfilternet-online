@@ -376,9 +376,14 @@ if uploaded_file:
                         save_audio(output_path, enhanced, sr=df_state.sr())
                         with open(output_path, "rb") as f:
                             audio_bytes = f.read()
+                        # プレイヤー用に元音源もWAVで保存（シーク同期のため）
+                        input_wav_path = os.path.join(tmpdirname, "original.wav")
+                        save_audio(input_wav_path, audio, sr=df_state.sr())
+                        with open(input_wav_path, "rb") as f:
+                            input_wav_bytes = f.read()
                         
                         st.session_state['processed_data'] = {
-                            'input': uploaded_file.getvalue(),
+                            'input_wav': input_wav_bytes,
                             'output': audio_bytes,
                             'name': uploaded_file.name,
                             'time': proc_duration
@@ -396,6 +401,8 @@ if uploaded_file:
 
     if 'processed_data' in st.session_state:
         res = st.session_state['processed_data']
+        in_b64 = base64.b64encode(res['input_wav']).decode()
+        out_b64 = base64.b64encode(res['output']).decode()
         
         st.subheader(T['step3'])
         
@@ -407,15 +414,84 @@ if uploaded_file:
             </div>
         """, unsafe_allow_html=True)
         
-        col_res1, col_res2 = st.columns(2)
-        with col_res1:
-            st.markdown(f"**{T['input_label']}**")
-            st.audio(res['input'], format="audio/wav")
-        with col_res2:
-            st.markdown(f"**{T['output_label']}**")
-            st.audio(res['output'], format="audio/wav")
+        # 1本のシークバー＋元の音源/AI除去後の切り替えボタン
+        st.components.v1.html(f"""
+            <style>
+                .player-wrap {{ max-width: 600px; margin: 1rem 0; }}
+                .player-btns {{ display: flex; gap: 12px; margin-bottom: 12px; }}
+                .player-btns button {{
+                    background: #1a1a1a; color: #fff; border: 1px solid #333;
+                    padding: 8px 16px; border-radius: 6px; cursor: pointer;
+                    font-size: 0.85rem; font-family: inherit;
+                }}
+                .player-btns button.active {{ background: #333; border-color: #666; }}
+                .player-btns button:hover {{ background: #262626; }}
+                .player-time {{ color: #888; font-size: 0.8rem; margin-bottom: 6px; font-family: monospace; }}
+                .player-seek {{ width: 100%; height: 8px; accent-color: #fff; cursor: pointer; }}
+            </style>
+            <div class="player-wrap">
+                <div class="player-btns">
+                    <button type="button" id="btnOrig">{T['input_label']}</button>
+                    <button type="button" id="btnEnh">{T['output_label']}</button>
+                </div>
+                <div class="player-time" id="timeDisplay">0:00 / 0:00</div>
+                <input type="range" class="player-seek" id="seekBar" min="0" max="100" value="0" step="0.1">
+            </div>
+            <audio id="a1" preload="auto"></audio>
+            <audio id="a2" preload="auto"></audio>
+            <script>
+                (function() {{
+                    var a1 = document.getElementById('a1');
+                    var a2 = document.getElementById('a2');
+                    var seekBar = document.getElementById('seekBar');
+                    var timeDisplay = document.getElementById('timeDisplay');
+                    var btnOrig = document.getElementById('btnOrig');
+                    var btnEnh = document.getElementById('btnEnh');
+                    var active = 1;
+                    var dur = 0;
+                    a1.src = 'data:audio/wav;base64,{in_b64}';
+                    a2.src = 'data:audio/wav;base64,{out_b64}';
+                    function fmt(t) {{
+                        if (isNaN(t) || !isFinite(t)) return '0:00';
+                        var m = Math.floor(t / 60), s = Math.floor(t % 60);
+                        return m + ':' + (s < 10 ? '0' : '') + s;
+                    }}
+                    function setActive(n) {{
+                        active = n;
+                        btnOrig.classList.toggle('active', n === 1);
+                        btnEnh.classList.toggle('active', n === 2);
+                        a1.muted = (n !== 1);
+                        a2.muted = (n !== 2);
+                        if (n === 1) {{ a2.pause(); a2.currentTime = a1.currentTime; a1.play(); }}
+                        else {{ a1.pause(); a1.currentTime = a2.currentTime; a2.play(); }}
+                    }}
+                    btnOrig.onclick = function() {{ setActive(1); }};
+                    btnEnh.onclick = function() {{ setActive(2); }};
+                    a1.onloadedmetadata = a2.onloadedmetadata = function() {{
+                        dur = Math.max(a1.duration, a2.duration);
+                        seekBar.max = dur;
+                    }};
+                    seekBar.oninput = function() {{
+                        var t = parseFloat(seekBar.value);
+                        a1.currentTime = a2.currentTime = t;
+                        timeDisplay.textContent = fmt(t) + ' / ' + fmt(dur);
+                    }};
+                    function onTime() {{
+                        var t = active === 1 ? a1.currentTime : a2.currentTime;
+                        a1.currentTime = a2.currentTime = t;
+                        seekBar.value = t;
+                        timeDisplay.textContent = fmt(t) + ' / ' + fmt(dur);
+                    }}
+                    a1.ontimeupdate = a2.ontimeupdate = onTime;
+                    a1.onloadedmetadata();
+                }})();
+            </script>
+        """, height=140)
         
-        st.download_button(T['btn_download'], res['output'], f"{os.path.splitext(res['name'])[0]}_enhanced.wav", "audio/wav", key="dl_btn_final")
+        # Download: 必ず bytes を渡す。key は結果ごとに一意に（Cloud Run でセッションずれ対策）
+        out_bytes = res['output'] if isinstance(res['output'], bytes) else bytes(res['output'])
+        dl_name = f"{os.path.splitext(res['name'])[0]}_enhanced.wav"
+        st.download_button(T['btn_download'], out_bytes, dl_name, "audio/wav", key=f"dl_{len(out_bytes)}_{res['time']:.1f}".replace(".", "_"))
 
 # フッター
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
