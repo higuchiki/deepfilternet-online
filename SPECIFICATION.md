@@ -8,7 +8,7 @@ DeepFilterNet V3 を使用した、ブラウザ上で動作する高品質音声
 - **リージョン**: asia-northeast1 (東京)
 - **スペック**: 2 vCPU / 2GiB RAM
 - **デプロイ方式**: GitHub `main` ブランチへのプッシュによる自動ビルド・デプロイ (CI/CD)
-- **ビルド構成**: Cloud Build は `cloudbuild.yaml` を使用し、Kaniko を利用して高速ビルドを行います。
+- **ビルド構成**: Cloud Build は `cloudbuild.yaml` を使用し、Kaniko でイメージをビルド・プッシュする。レイヤーキャッシュ用に `deepfilternet` リポジトリ内の `build-cache` イメージを使用する（初回または依存変更時は 10〜15 分、コードのみ変更時は 2〜3 分が目安）。
 
 ## 3. 開発・デプロイ・運用ルール (重要)
 

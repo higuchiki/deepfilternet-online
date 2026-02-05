@@ -1,24 +1,14 @@
+# Kaniko でビルド（レイヤーキャッシュ有効）。マルチステージの builder 層もキャッシュされ、コードのみ変更時は 2〜3 分程度で完了する想定。
 steps:
-  # 1. Docker を使用してイメージをビルドします (キャッシュを有効化)
-  - name: 'gcr.io/cloud-builders/docker'
-    args: 
-      - 'build'
-      - '--cache-from'
-      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
-      - '-t'
-      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA'
-      - '-t'
-      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
-      - '.'
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args:
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA
+      - --destination=asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest
+      - --cache=true
+      - --cache-repo=asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/build-cache
+      - --cache-ttl=168h
+      - '--verbosity=info'
 
-  # 2. イメージを Artifact Registry にプッシュします
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA']
-  
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest']
-
-  # 3. Cloud Run にデプロイします
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -37,12 +27,10 @@ steps:
       - '--cpu'
       - '2'
 
-# ビルドしたイメージを保存
 images:
   - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA'
   - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
 
-# タイムアウトを30分に設定
 timeout: 1800s
 
 options:
