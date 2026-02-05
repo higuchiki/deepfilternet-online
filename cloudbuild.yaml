@@ -27,10 +27,7 @@ steps:
       - '--cpu'
       - '2'
 
-images:
-  - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:$COMMIT_SHA'
-  - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/deepfilternet/deep-filter-net:latest'
-
+# Kaniko が直接プッシュするため images は指定しない（指定すると Cloud Build が検証で失敗する）
 timeout: 1800s
 
 options:
