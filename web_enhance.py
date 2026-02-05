@@ -473,6 +473,7 @@ if uploaded_file:
                     <button type="button" id="btnEnh">{T['output_label']}</button>
                 </div>
                 <div class="player-ctrl">
+                    <span id="loadStatus" style="color:#888;font-size:0.8rem;margin-right:8px;"></span>
                     <button type="button" id="btnPlay" title="再生">▶</button>
                     <button type="button" id="btnPause" title="一時停止">⏸</button>
                     <button type="button" id="btnStop" title="停止">⏹</button>
@@ -489,6 +490,8 @@ if uploaded_file:
                     <button type="button" id="btnDownload" class="dl-btn">{T['btn_download']}</button>
                 </div>
             </div>
+            <textarea id="storeIn" style="display:none;width:0;height:0;">{in_b64}</textarea>
+            <textarea id="storeOut" style="display:none;width:0;height:0;">{out_b64}</textarea>
             <audio id="a1" preload="auto"></audio>
             <audio id="a2" preload="auto"></audio>
             <script>
@@ -513,18 +516,42 @@ if uploaded_file:
                     var dlNameWav = '{dl_name_wav_esc}';
                     var dlNameMp3 = '{dl_name_mp3_esc}';
                     var mp3B64 = '{mp3_b64}';
+                    var blob1, blob2;
+                    var loadStatus = document.getElementById('loadStatus');
                     function b64ToBlob(b64, type) {{
                         var bin = atob(b64);
                         var buf = new Uint8Array(bin.length);
                         for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
                         return new Blob([buf], {{ type: type }});
                     }}
-                    var blob1 = b64ToBlob('{in_b64}', 'audio/wav');
-                    var blob2 = b64ToBlob('{out_b64}', 'audio/wav');
-                    a1.src = URL.createObjectURL(blob1);
-                    a2.src = URL.createObjectURL(blob2);
-                    a1.preload = 'auto';
-                    a2.preload = 'auto';
+                    function initAudio() {{
+                        loadStatus.textContent = 'Preparing…';
+                        btnPlay.disabled = true;
+                        var inB64 = document.getElementById('storeIn').value;
+                        var outB64 = document.getElementById('storeOut').value;
+                        blob1 = b64ToBlob(inB64, 'audio/wav');
+                        blob2 = b64ToBlob(outB64, 'audio/wav');
+                        a1.src = URL.createObjectURL(blob1);
+                        a2.src = URL.createObjectURL(blob2);
+                        a1.preload = 'auto';
+                        a2.preload = 'auto';
+                        a1.load();
+                        a2.load();
+                        var ready = 0;
+                        function onReady() {{
+                            ready++;
+                            if (ready >= 2) {{
+                                loadStatus.textContent = '';
+                                btnPlay.disabled = false;
+                            }}
+                        }}
+                        a1.addEventListener('loadeddata', onReady, {{ once: true }});
+                        a2.addEventListener('loadeddata', onReady, {{ once: true }});
+                    }}
+                    if (typeof requestIdleCallback !== 'undefined')
+                        requestIdleCallback(initAudio, {{ timeout: 400 }});
+                    else
+                        setTimeout(initAudio, 0);
                     if (!hasMp3) {{ optMp3.disabled = true; optMp3.textContent = optMp3.textContent + ' (n/a)'; }}
                     function curr() {{ return active === 1 ? a1 : a2; }}
                     function fmt(t) {{
