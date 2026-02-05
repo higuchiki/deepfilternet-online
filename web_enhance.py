@@ -49,6 +49,8 @@ T = {
     'input_label': '元の音源',
     'output_label': 'AI除去後',
     'btn_download': 'Download',
+    'dl_wav': 'WAV',
+    'dl_mp3': 'MP3',
     'info_msg': 'ファイルをアップロードして「クリアな音声を生成する」をクリックしてください。',
     'powered_by': 'Powered by',
 }
@@ -376,6 +378,16 @@ if uploaded_file:
                         save_audio(output_path, enhanced, sr=df_state.sr())
                         with open(output_path, "rb") as f:
                             audio_bytes = f.read()
+                        # MP3 を ffmpeg で生成（Download の形式選択用）
+                        mp3_path = os.path.join(tmpdirname, "enhanced.mp3")
+                        subprocess.run(
+                            ["ffmpeg", "-y", "-i", output_path, "-acodec", "libmp3lame", "-q:a", "2", mp3_path],
+                            capture_output=True, timeout=120
+                        )
+                        output_mp3 = b""
+                        if os.path.isfile(mp3_path):
+                            with open(mp3_path, "rb") as f:
+                                output_mp3 = f.read()
                         # プレイヤー用に元音源もWAVで保存（シーク同期のため）
                         input_wav_path = os.path.join(tmpdirname, "original.wav")
                         save_audio(input_wav_path, audio, sr=df_state.sr())
@@ -385,6 +397,7 @@ if uploaded_file:
                         st.session_state['processed_data'] = {
                             'input_wav': input_wav_bytes,
                             'output': audio_bytes,
+                            'output_mp3': output_mp3,
                             'name': uploaded_file.name,
                             'time': proc_duration
                         }
@@ -403,6 +416,14 @@ if uploaded_file:
         res = st.session_state['processed_data']
         in_b64 = base64.b64encode(res['input_wav']).decode()
         out_b64 = base64.b64encode(res['output']).decode()
+        output_mp3 = res.get('output_mp3') or b""
+        mp3_b64 = base64.b64encode(output_mp3).decode() if output_mp3 else ""
+        has_mp3 = "true" if output_mp3 else "false"
+        base_name = os.path.splitext(res['name'])[0]
+        dl_name_wav = base_name + "_enhanced.wav"
+        dl_name_mp3 = base_name + "_enhanced.mp3"
+        dl_name_wav_esc = dl_name_wav.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
+        dl_name_mp3_esc = dl_name_mp3.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
         
         st.subheader(T['step3'])
         
@@ -414,30 +435,40 @@ if uploaded_file:
             </div>
         """, unsafe_allow_html=True)
         
-        # ファイル名（Download用・JSに渡すためエスケープ）
-        dl_name = f"{os.path.splitext(res['name'])[0]}_enhanced.wav"
-        dl_name_esc = dl_name.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
-        # 1本のシークバー＋元の音源/AI除去後切り替え＋再生コントロール＋Download（クライアント側でBlob保存）
+        # プレイヤー: Blob URL で再生を軽く / UI 統一 / WAV・MP3 ダウンロード
         st.components.v1.html(f"""
             <style>
-                .player-wrap {{ max-width: 600px; margin: 1rem 0; }}
-                .player-btns {{ display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }}
-                .player-btns button {{
-                    background: #1a1a1a; color: #fff; border: 1px solid #333;
-                    padding: 8px 16px; border-radius: 6px; cursor: pointer;
-                    font-size: 0.85rem; font-family: inherit;
+                .player-wrap {{ max-width: 560px; margin: 1rem 0; font-family: inherit; }}
+                .player-src {{ display: flex; gap: 8px; margin-bottom: 14px; }}
+                .player-src button {{
+                    padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;
+                    background: #1a1a1a; color: #e5e5e5; border: 1px solid #333; cursor: pointer;
                 }}
-                .player-btns button.active {{ background: #333; border-color: #666; }}
-                .player-btns button:hover {{ background: #262626; }}
-                .player-ctrl {{ display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }}
-                .player-ctrl button {{ min-width: 36px; padding: 8px 12px; }}
-                .player-time {{ color: #888; font-size: 0.8rem; margin-bottom: 6px; font-family: monospace; }}
-                .player-seek {{ width: 100%; height: 8px; accent-color: #fff; cursor: pointer; }}
-                .player-dl {{ margin-top: 12px; }}
-                .player-dl button {{ background: #fff; color: #000; font-weight: 600; }}
+                .player-src button.active {{ background: #333; color: #fff; border-color: #555; }}
+                .player-src button:hover {{ background: #262626; }}
+                .player-ctrl {{ display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }}
+                .player-ctrl button {{
+                    width: 36px; height: 36px; border-radius: 8px; border: 1px solid #333;
+                    background: #1a1a1a; color: #e5e5e5; cursor: pointer; font-size: 0.9rem;
+                    display: flex; align-items: center; justify-content: center; padding: 0;
+                }}
+                .player-ctrl button:hover {{ background: #262626; border-color: #444; }}
+                .player-ctrl .skip {{ width: auto; padding: 0 10px; font-size: 0.75rem; }}
+                .player-time {{ color: #888; font-size: 0.8rem; margin-bottom: 6px; font-variant-numeric: tabular-nums; }}
+                .player-seek {{ width: 100%; height: 6px; border-radius: 3px; accent-color: #fff; cursor: pointer; margin-bottom: 16px; }}
+                .player-dl {{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }}
+                .player-dl select {{
+                    padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;
+                    background: #1a1a1a; color: #e5e5e5; border: 1px solid #333; cursor: pointer;
+                }}
+                .player-dl .dl-btn {{
+                    padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; font-weight: 600;
+                    background: #fff; color: #000; border: 1px solid #fff; cursor: pointer;
+                }}
+                .player-dl .dl-btn:hover {{ background: #e5e5e5; border-color: #e5e5e5; }}
             </style>
             <div class="player-wrap">
-                <div class="player-btns">
+                <div class="player-src">
                     <button type="button" id="btnOrig">{T['input_label']}</button>
                     <button type="button" id="btnEnh">{T['output_label']}</button>
                 </div>
@@ -445,13 +476,17 @@ if uploaded_file:
                     <button type="button" id="btnPlay" title="再生">▶</button>
                     <button type="button" id="btnPause" title="一時停止">⏸</button>
                     <button type="button" id="btnStop" title="停止">⏹</button>
-                    <button type="button" id="btnBack10" title="10秒戻る">−10s</button>
-                    <button type="button" id="btnFwd10" title="10秒進む">+10s</button>
+                    <button type="button" id="btnBack10" class="skip" title="10秒戻る">−10</button>
+                    <button type="button" id="btnFwd10" class="skip" title="10秒進む">+10</button>
                 </div>
                 <div class="player-time" id="timeDisplay">0:00 / 0:00</div>
                 <input type="range" class="player-seek" id="seekBar" min="0" max="100" value="0" step="0.1">
                 <div class="player-dl">
-                    <button type="button" id="btnDownload">{T['btn_download']}</button>
+                    <select id="dlFormat">
+                        <option value="wav">{T['dl_wav']}</option>
+                        <option value="mp3" id="optMp3">{T['dl_mp3']}</option>
+                    </select>
+                    <button type="button" id="btnDownload" class="dl-btn">{T['btn_download']}</button>
                 </div>
             </div>
             <audio id="a1" preload="auto"></audio>
@@ -470,11 +505,27 @@ if uploaded_file:
                     var btnBack10 = document.getElementById('btnBack10');
                     var btnFwd10 = document.getElementById('btnFwd10');
                     var btnDownload = document.getElementById('btnDownload');
+                    var dlFormat = document.getElementById('dlFormat');
+                    var optMp3 = document.getElementById('optMp3');
                     var active = 1;
                     var dur = 0;
-                    var dlFileName = '{dl_name_esc}';
-                    a1.src = 'data:audio/wav;base64,{in_b64}';
-                    a2.src = 'data:audio/wav;base64,{out_b64}';
+                    var hasMp3 = {has_mp3};
+                    var dlNameWav = '{dl_name_wav_esc}';
+                    var dlNameMp3 = '{dl_name_mp3_esc}';
+                    var mp3B64 = '{mp3_b64}';
+                    function b64ToBlob(b64, type) {{
+                        var bin = atob(b64);
+                        var buf = new Uint8Array(bin.length);
+                        for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+                        return new Blob([buf], {{ type: type }});
+                    }}
+                    var blob1 = b64ToBlob('{in_b64}', 'audio/wav');
+                    var blob2 = b64ToBlob('{out_b64}', 'audio/wav');
+                    a1.src = URL.createObjectURL(blob1);
+                    a2.src = URL.createObjectURL(blob2);
+                    a1.preload = 'auto';
+                    a2.preload = 'auto';
+                    if (!hasMp3) {{ optMp3.disabled = true; optMp3.textContent = optMp3.textContent + ' (n/a)'; }}
                     function curr() {{ return active === 1 ? a1 : a2; }}
                     function fmt(t) {{
                         if (isNaN(t) || !isFinite(t)) return '0:00';
@@ -514,17 +565,18 @@ if uploaded_file:
                     }};
                     btnDownload.onclick = function() {{
                         try {{
-                            var src = a2.src;
-                            var base64 = src.indexOf('base64,') >= 0 ? src.split('base64,')[1] : '';
-                            var bin = atob(base64);
-                            var len = bin.length;
-                            var buf = new Uint8Array(len);
-                            for (var i = 0; i < len; i++) buf[i] = bin.charCodeAt(i);
-                            var blob = new Blob([buf], {{ type: 'audio/wav' }});
+                            var blob, name, mime;
+                            if (dlFormat.value === 'mp3' && hasMp3 && mp3B64) {{
+                                blob = b64ToBlob(mp3B64, 'audio/mpeg');
+                                name = dlNameMp3;
+                            }} else {{
+                                blob = blob2;
+                                name = dlNameWav;
+                            }}
                             var url = URL.createObjectURL(blob);
                             var a = document.createElement('a');
                             a.href = url;
-                            a.download = dlFileName;
+                            a.download = name;
                             a.click();
                             URL.revokeObjectURL(url);
                         }} catch (e) {{ console.error(e); }}
@@ -548,7 +600,7 @@ if uploaded_file:
                     a1.onloadedmetadata();
                 }})();
             </script>
-        """, height=220)
+        """, height=240)
 
 # フッター
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
