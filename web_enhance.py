@@ -414,11 +414,14 @@ if uploaded_file:
             </div>
         """, unsafe_allow_html=True)
         
-        # 1本のシークバー＋元の音源/AI除去後の切り替えボタン
+        # ファイル名（Download用・JSに渡すためエスケープ）
+        dl_name = f"{os.path.splitext(res['name'])[0]}_enhanced.wav"
+        dl_name_esc = dl_name.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
+        # 1本のシークバー＋元の音源/AI除去後切り替え＋再生コントロール＋Download（クライアント側でBlob保存）
         st.components.v1.html(f"""
             <style>
                 .player-wrap {{ max-width: 600px; margin: 1rem 0; }}
-                .player-btns {{ display: flex; gap: 12px; margin-bottom: 12px; }}
+                .player-btns {{ display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }}
                 .player-btns button {{
                     background: #1a1a1a; color: #fff; border: 1px solid #333;
                     padding: 8px 16px; border-radius: 6px; cursor: pointer;
@@ -426,16 +429,30 @@ if uploaded_file:
                 }}
                 .player-btns button.active {{ background: #333; border-color: #666; }}
                 .player-btns button:hover {{ background: #262626; }}
+                .player-ctrl {{ display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }}
+                .player-ctrl button {{ min-width: 36px; padding: 8px 12px; }}
                 .player-time {{ color: #888; font-size: 0.8rem; margin-bottom: 6px; font-family: monospace; }}
                 .player-seek {{ width: 100%; height: 8px; accent-color: #fff; cursor: pointer; }}
+                .player-dl {{ margin-top: 12px; }}
+                .player-dl button {{ background: #fff; color: #000; font-weight: 600; }}
             </style>
             <div class="player-wrap">
                 <div class="player-btns">
                     <button type="button" id="btnOrig">{T['input_label']}</button>
                     <button type="button" id="btnEnh">{T['output_label']}</button>
                 </div>
+                <div class="player-ctrl">
+                    <button type="button" id="btnPlay" title="再生">▶</button>
+                    <button type="button" id="btnPause" title="一時停止">⏸</button>
+                    <button type="button" id="btnStop" title="停止">⏹</button>
+                    <button type="button" id="btnBack10" title="10秒戻る">−10s</button>
+                    <button type="button" id="btnFwd10" title="10秒進む">+10s</button>
+                </div>
                 <div class="player-time" id="timeDisplay">0:00 / 0:00</div>
                 <input type="range" class="player-seek" id="seekBar" min="0" max="100" value="0" step="0.1">
+                <div class="player-dl">
+                    <button type="button" id="btnDownload">{T['btn_download']}</button>
+                </div>
             </div>
             <audio id="a1" preload="auto"></audio>
             <audio id="a2" preload="auto"></audio>
@@ -447,10 +464,18 @@ if uploaded_file:
                     var timeDisplay = document.getElementById('timeDisplay');
                     var btnOrig = document.getElementById('btnOrig');
                     var btnEnh = document.getElementById('btnEnh');
+                    var btnPlay = document.getElementById('btnPlay');
+                    var btnPause = document.getElementById('btnPause');
+                    var btnStop = document.getElementById('btnStop');
+                    var btnBack10 = document.getElementById('btnBack10');
+                    var btnFwd10 = document.getElementById('btnFwd10');
+                    var btnDownload = document.getElementById('btnDownload');
                     var active = 1;
                     var dur = 0;
+                    var dlFileName = '{dl_name_esc}';
                     a1.src = 'data:audio/wav;base64,{in_b64}';
                     a2.src = 'data:audio/wav;base64,{out_b64}';
+                    function curr() {{ return active === 1 ? a1 : a2; }}
                     function fmt(t) {{
                         if (isNaN(t) || !isFinite(t)) return '0:00';
                         var m = Math.floor(t / 60), s = Math.floor(t % 60);
@@ -467,8 +492,45 @@ if uploaded_file:
                     }}
                     btnOrig.onclick = function() {{ setActive(1); }};
                     btnEnh.onclick = function() {{ setActive(2); }};
+                    btnPlay.onclick = function() {{ curr().play(); }};
+                    btnPause.onclick = function() {{ a1.pause(); a2.pause(); }};
+                    btnStop.onclick = function() {{
+                        a1.pause(); a2.pause();
+                        a1.currentTime = a2.currentTime = 0;
+                        seekBar.value = 0;
+                        timeDisplay.textContent = '0:00 / ' + fmt(dur);
+                    }};
+                    btnBack10.onclick = function() {{
+                        var t = Math.max(0, curr().currentTime - 10);
+                        a1.currentTime = a2.currentTime = t;
+                        seekBar.value = t;
+                        timeDisplay.textContent = fmt(t) + ' / ' + fmt(dur);
+                    }};
+                    btnFwd10.onclick = function() {{
+                        var t = Math.min(dur, curr().currentTime + 10);
+                        a1.currentTime = a2.currentTime = t;
+                        seekBar.value = t;
+                        timeDisplay.textContent = fmt(t) + ' / ' + fmt(dur);
+                    }};
+                    btnDownload.onclick = function() {{
+                        try {{
+                            var src = a2.src;
+                            var base64 = src.indexOf('base64,') >= 0 ? src.split('base64,')[1] : '';
+                            var bin = atob(base64);
+                            var len = bin.length;
+                            var buf = new Uint8Array(len);
+                            for (var i = 0; i < len; i++) buf[i] = bin.charCodeAt(i);
+                            var blob = new Blob([buf], {{ type: 'audio/wav' }});
+                            var url = URL.createObjectURL(blob);
+                            var a = document.createElement('a');
+                            a.href = url;
+                            a.download = dlFileName;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                        }} catch (e) {{ console.error(e); }}
+                    }};
                     a1.onloadedmetadata = a2.onloadedmetadata = function() {{
-                        dur = Math.max(a1.duration, a2.duration);
+                        dur = Math.max(a1.duration || 0, a2.duration || 0);
                         seekBar.max = dur;
                     }};
                     seekBar.oninput = function() {{
@@ -486,12 +548,7 @@ if uploaded_file:
                     a1.onloadedmetadata();
                 }})();
             </script>
-        """, height=140)
-        
-        # Download: 必ず bytes を渡す。key は結果ごとに一意に（Cloud Run でセッションずれ対策）
-        out_bytes = res['output'] if isinstance(res['output'], bytes) else bytes(res['output'])
-        dl_name = f"{os.path.splitext(res['name'])[0]}_enhanced.wav"
-        st.download_button(T['btn_download'], out_bytes, dl_name, "audio/wav", key=f"dl_{len(out_bytes)}_{res['time']:.1f}".replace(".", "_"))
+        """, height=220)
 
 # フッター
 st.markdown("<br><br><br><br>", unsafe_allow_html=True)
